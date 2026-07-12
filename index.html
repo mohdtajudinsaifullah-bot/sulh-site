@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Korporat Sulh Komuniti</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* 1. Teknik Gambar Latar Belakang Transparent/Pudar */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Supaya gambar duduk paling belakang sekali */
+            background-image: url('assets/bg-korporat.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            /* ⚡ TUKAR TRANSPARENT DI SINI: 
+               0.2 bermaksud 20% kejelasan (sangat pudar/transparent). 
+               Kalau nak terang sikit, boleh tukar jadi 0.3 atau 0.4 */
+            opacity: 0.1; 
+        }
+
+        /* 2. Animasi Marquee Scroller (Kekalkan yang asal) */
+        @keyframes marquee {
+            0% { 
+                transform: translateX(0%);
+                left: 100%;
+            }
+            100% { 
+                transform: translateX(-100%);
+                left: 0%;
+            }
+        }
+        
+        .animate-marquee {
+            animation: marquee 10s linear infinite;
+        }
+    </style>
+</head>
+<body class="relative bg-gray-50 text-gray-800 font-sans min-h-screen">
+
+    <!-- ERROR ALERT (Akan muncul kalau API kau ada masalah) -->
+    <div id="error-alert" class="bg-red-600 text-white p-3 text-center font-bold hidden">
+        Ralat: Gagal menarik data dari Google Sheets. Sila pastikan URL API Sheety anda betul.
+    </div>
+
+    <!-- 1. SCROLLER BERGERAK (DIPAKSA MULA DARI LUAR SKRIN KANAN) -->
+    <div class="relative w-full bg-purple-200 text-purple-950 overflow-hidden h-12 font-semibold shadow-sm flex items-center">
+        <div id="scroller-text" class="absolute left-0 whitespace-nowrap inline-block animate-marquee text-lg tracking-wide">
+            Selamat datang ke website RSK...
+        </div>
+    </div>
+
+    <!-- 2. NAVIGATION BAR -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-teal-700 tracking-wider">PORTAL RAKAN SULH KOMUNITI</span>
+                </div>
+                <div class="hidden md:flex space-x-8 font-semibold text-gray-600">
+                    <button onclick="tukarTab('home')" class="hover:text-teal-700 pb-2 border-b-2 border-transparent hover:border-teal-700 transition cursor-pointer">Home</button>
+                    <button onclick="tukarTab('info')" class="hover:text-teal-700 pb-2 border-b-2 border-transparent hover:border-teal-700 transition cursor-pointer">Info Sulh</button>
+                    <button onclick="tukarTab('rakan')" class="hover:text-teal-700 pb-2 border-b-2 border-transparent hover:border-teal-700 transition cursor-pointer">Rakan Sulh Komuniti</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 3. HEADING IMAGE / HERO BANNER -->
+    <!-- CARI BAHAGIAN INI DAN KOSONGKAN ISI <h1> -->
+    <div id="hero-section" class="relative h-[400px] w-full bg-gray-900 overflow-hidden">
+        <img id="heading-image" src="" alt="Corporate Banner" class="w-full h-full object-cover opacity-80 transition-all duration-500">
+        <div class="absolute inset-0 bg-gradient-to-r from-teal-950/80 to-transparent flex items-center">
+            <div class="max-w-7xl mx-auto px-4 w-full">
+                <!-- Dah dikosongkan supaya tak keluar teks pelik sementara loading -->
+                <h1 id="welcome-title" class="text-4xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-md"></h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. KANDUNGAN UTAMA -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <!-- HOME TAB -->
+        <div id="tab-home" class="tab-content block">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-4xl">
+                <h2 class="text-2xl font-bold text-teal-800 mb-4">Selamat Datang</h2>
+                <p id="welcome-desc" class="text-gray-600 leading-relaxed text-lg">Memuatkan kandungan maklumat utama...</p>
+            </div>
+        </div>
+
+        <!-- INFO SULH TAB -->
+        <div id="tab-info" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-info">
+                    <!-- Dinamik sub-tajuk -->
+                </div>
+                <div class="md:col-span-3 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[400px]">
+                    <div id="kandungan-info" class="prose max-w-none text-gray-700 leading-relaxed">
+                        Pilih sub-tajuk di sebelah kiri untuk melihat maklumat.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAKAN SULH TAB -->
+        <div id="tab-rakan" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-rakan">
+                    <!-- Dinamik sub-tajuk -->
+                </div>
+                <div class="md:col-span-3 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[400px]">
+                    <div id="kandungan-rakan" class="prose max-w-none text-gray-700 leading-relaxed">
+                        Pilih sub-tajuk di sebelah kiri untuk melihat maklumat rakan komuniti.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // URL API Sheety kau
+        const BASE_API_URL = "https://api.sheety.co/9e5d2c7fedb765e53a6aee6bd68ea72c/dbSiteSulh/";
+
+        let dataInfoSulh = [];
+        let dataRakanSulh = [];
+
+        function tukarTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            
+            const hero = document.getElementById('hero-section');
+            if(tabName === 'home') {
+                hero.classList.remove('hidden');
+            } else {
+                hero.classList.add('hidden');
+            }
+        }
+
+        async function muatTurunData() {
+            try {
+                // 1. Load Halaman Utama
+                const resUtama = await fetch(`${BASE_API_URL}halamanUtama`);
+                if (!resUtama.ok) throw new Error("Gagal load Halaman Utama");
+                const jsonUtama = await resUtama.json();
+                
+                // PENTING: Guna huruf kecil 'key' dan 'value' ikut format Sheety
+                jsonUtama.halamanUtama.forEach(item => {
+                    // Jika data dalam sheet tak wujud atau kosong, kita bagi string kosong ""
+                    const nilai = item.value ? item.value : "";
+                    
+                    if(item.key === 'heading_image') document.getElementById('heading-image').src = nilai;
+                    if(item.key === 'scroller_text') document.getElementById('scroller-text').innerText = nilai;
+                    
+                    // Selesaikan isu undefined/kosong untuk tajuk banner
+                    if(item.key === 'welcome_title') {
+                        document.getElementById('welcome-title').innerText = nilai;
+                    }
+                    if(item.key === 'welcome_desc') document.getElementById('welcome-desc').innerText = nilai;
+                });
+
+                // 2. Load Menu Info Sulh
+                const resInfo = await fetch(`${BASE_API_URL}menuInfoSulh`);
+                if (!resInfo.ok) throw new Error("Gagal load Menu Info");
+                const jsonInfo = await resInfo.json();
+                // Filter huruf kecil 'status'
+                dataInfoSulh = jsonInfo.menuInfoSulh.filter(item => item.status && item.status.toLowerCase() === 'aktif');
+                binaSidebar('info', dataInfoSulh);
+
+                // 3. Load Menu Rakan Sulh
+                const resRakan = await fetch(`${BASE_API_URL}menuRakanSulh`);
+                if (!resRakan.ok) throw new Error("Gagal load Menu Rakan");
+                const jsonRakan = await resRakan.json();
+                dataRakanSulh = jsonRakan.menuRakanSulh.filter(item => item.status && item.status.toLowerCase() === 'aktif');
+                binaSidebar('rakan', dataRakanSulh);
+
+            } catch (error) {
+                console.error("Detail Error:", error);
+                document.getElementById('error-alert').classList.remove('hidden');
+            }
+        }
+
+        function binaSidebar(jenis, data) {
+            const container = document.getElementById(`sidebar-${jenis}`);
+            container.innerHTML = ""; 
+
+            data.forEach((item, index) => {
+                const btn = document.createElement('button');
+                // TUKAR TEMA HOVER DI SINI JADI PURPLE:
+                btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
+                btn.innerText = item.tajuk;
+                btn.onclick = () => paparkanKandungan(jenis, index);
+                container.appendChild(btn);
+            });
+
+            if(data.length > 0) paparkanKandungan(jenis, 0);
+        }
+
+        function paparkanKandungan(jenis, index) {
+            const sasaranKandungan = document.getElementById(`kandungan-${jenis}`);
+            const item = jenis === 'info' ? dataInfoSulh[index] : dataRakanSulh[index];
+            
+            const butangButang = document.getElementById(`sidebar-${jenis}`).querySelectorAll('button');
+            butangButang.forEach((btn, idx) => {
+                if(idx === index) {
+                    btn.className = "w-full text-left px-4 py-3 rounded-xl font-bold bg-purple-700 text-white cursor-pointer shadow-sm";
+                } else {
+                    btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
+                }
+            });
+
+            // ⚡ LOGIK PINTAR: (Nama variable dah dirapatkan: paparanKandunganAkhir)
+            let paparanKandunganAkhir = item.kandungan;
+            
+            if (item.kandungan && (item.kandungan.trim().startsWith('http://') || item.kandungan.trim().startsWith('https://'))) {
+                // Jika data ialah URL bersih, kita bungkus siap-siap dalam iframe korporat yang responsif
+                paparanKandunganAkhir = `
+                    <div class="w-full overflow-hidden rounded-xl border border-gray-100 shadow-sm bg-white mt-4">
+                        <iframe src="${item.kandungan.trim()}" width="100%" height="600" style="border:0;" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                `;
+            }
+
+            // Paparkan tajuk dan kandungan akhir ke skrin
+            sasaranKandungan.innerHTML = `
+                <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight pb-4 border-b border-gray-100 mb-6">
+                    ${item.tajuk}
+                </h3>
+                <div class="space-y-4 text-gray-750 leading-relaxed font-normal text-[16px]">
+                    ${paparanKandunganAkhir}
+                </div>
+            `;
+        }
+
+        window.onload = muatTurunData;
+    </script>
+</body>
+</html>
