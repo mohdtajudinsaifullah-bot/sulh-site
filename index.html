@@ -22,7 +22,7 @@
             background-repeat: no-repeat;
             
             /* ⚡ TUKAR TRANSPARENT DI SINI: 
-               0.2 bermaksud 20% kejelasan (sangat pudar/transparent). 
+               0.1 bermaksud 20% kejelasan (sangat pudar/transparent). 
                Kalau nak terang sikit, boleh tukar jadi 0.3 atau 0.4 */
             opacity: 0.4; 
         }
@@ -129,7 +129,8 @@
 
     <script>
         // URL API Sheety kau
-        const BASE_API_URL = "https://api.sheety.co/9e5d2c7fedb765e53a6aee6bd68ea72c/dbSiteSulh/";
+        // ⚡ GANTIKAN DENGAN URL GOOGLE APPS SCRIPT KAU YANG BARU TADI:
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4xUcYJifvtli3CNzDUvNRsoDfYjimUdxpKoYESmM8HgtDsM_mYtqHOuC_oEKCNpX5tQ/exec";
 
         let dataInfoSulh = [];
         let dataRakanSulh = [];
@@ -148,40 +149,45 @@
 
         async function muatTurunData() {
             try {
-                // 1. Load Halaman Utama
-                const resUtama = await fetch(`${BASE_API_URL}halamanUtama`);
-                if (!resUtama.ok) throw new Error("Gagal load Halaman Utama");
-                const jsonUtama = await resUtama.json();
+                const respon = await fetch(GOOGLE_SCRIPT_URL);
+                if (!respon.ok) throw new Error("Gagal menyambung ke Google Sheets");
                 
-                // PENTING: Guna huruf kecil 'key' dan 'value' ikut format Sheety
-                jsonUtama.halamanUtama.forEach(item => {
-                    // Jika data dalam sheet tak wujud atau kosong, kita bagi string kosong ""
-                    const nilai = item.value ? item.value : "";
-                    
-                    if(item.key === 'heading_image') document.getElementById('heading-image').src = nilai;
-                    if(item.key === 'scroller_text') document.getElementById('scroller-text').innerText = nilai;
-                    
-                    // Selesaikan isu undefined/kosong untuk tajuk banner
-                    if(item.key === 'welcome_title') {
-                        document.getElementById('welcome-title').innerText = nilai;
-                    }
-                    if(item.key === 'welcome_desc') document.getElementById('welcome-desc').innerText = nilai;
-                });
+                const semuaData = await respon.json();
+                console.log("Data Berjaya Diterima:", semuaData);
 
-                // 2. Load Menu Info Sulh
-                const resInfo = await fetch(`${BASE_API_URL}menuInfoSulh`);
-                if (!resInfo.ok) throw new Error("Gagal load Menu Info");
-                const jsonInfo = await resInfo.json();
-                // Filter huruf kecil 'status'
-                dataInfoSulh = jsonInfo.menuInfoSulh.filter(item => item.status && item.status.toLowerCase() === 'aktif');
-                binaSidebar('info', dataInfoSulh);
+                // 1. Proses HalamanUtama
+                if (semuaData.HalamanUtama) {
+                    semuaData.HalamanUtama.forEach(item => {
+                        // Fleksibel: Terima 'key'/'Key' dan 'value'/'Value'
+                        const k = item.key || item.Key;
+                        const v = item.value || item.Value || "";
+                        
+                        if(k === 'heading_image') document.getElementById('heading-image').src = v;
+                        if(k === 'scroller_text') document.getElementById('scroller-text').innerText = v;
+                        if(k === 'welcome_title') document.getElementById('welcome-title').innerText = v;
+                        if(k === 'welcome_desc') document.getElementById('welcome-desc').innerText = v;
+                    });
+                }
 
-                // 3. Load Menu Rakan Sulh
-                const resRakan = await fetch(`${BASE_API_URL}menuRakanSulh`);
-                if (!resRakan.ok) throw new Error("Gagal load Menu Rakan");
-                const jsonRakan = await resRakan.json();
-                dataRakanSulh = jsonRakan.menuRakanSulh.filter(item => item.status && item.status.toLowerCase() === 'aktif');
-                binaSidebar('rakan', dataRakanSulh);
+                // 2. Proses MenuInfoSulh
+                if (semuaData.MenuInfoSulh) {
+                    dataInfoSulh = semuaData.MenuInfoSulh.filter(item => {
+                        const statusVal = item.status || item.Status;
+                        return statusVal && statusVal.toString().toLowerCase() === 'aktif';
+                    });
+                    binaSidebar('info', dataInfoSulh);
+                }
+
+                // 3. Proses MenuRakanSulh
+                if (semuaData.MenuRakanSulh) {
+                    dataRakanSulh = semuaData.MenuRakanSulh.filter(item => {
+                        const statusVal = item.status || item.Status;
+                        return statusVal && statusVal.toString().toLowerCase() === 'aktif';
+                    });
+                    binaSidebar('rakan', dataRakanSulh);
+                }
+
+                document.getElementById('error-alert').classList.add('hidden');
 
             } catch (error) {
                 console.error("Detail Error:", error);
@@ -195,9 +201,10 @@
 
             data.forEach((item, index) => {
                 const btn = document.createElement('button');
-                // TUKAR TEMA HOVER DI SINI JADI PURPLE:
-                btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
-                btn.innerText = item.tajuk;
+                btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
+                
+                // Fleksibel: Terima 'tajuk' atau 'Tajuk'
+                btn.innerText = item.tajuk || item.Tajuk || "Tiada Tajuk";
                 btn.onclick = () => paparkanKandungan(jenis, index);
                 container.appendChild(btn);
             });
@@ -218,22 +225,22 @@
                 }
             });
 
-            // ⚡ LOGIK PINTAR: (Nama variable dah dirapatkan: paparanKandunganAkhir)
-            let paparanKandunganAkhir = item.kandungan;
+            // Fleksibel: Terima 'tajuk'/'Tajuk' dan 'kandungan'/'Kandungan'
+            const tajukAkhir = item.tajuk || item.Tajuk || "";
+            let isiKandungan = item.kandungan || item.Kandungan || "";
+            let paparanKandunganAkhir = isiKandungan;
             
-            if (item.kandungan && (item.kandungan.trim().startsWith('http://') || item.kandungan.trim().startsWith('https://'))) {
-                // Jika data ialah URL bersih, kita bungkus siap-siap dalam iframe korporat yang responsif
+            if (isiKandungan && (isiKandungan.toString().trim().startsWith('http://') || isiKandungan.toString().trim().startsWith('https://'))) {
                 paparanKandunganAkhir = `
                     <div class="w-full overflow-hidden rounded-xl border border-gray-100 shadow-sm bg-white mt-4">
-                        <iframe src="${item.kandungan.trim()}" width="100%" height="600" style="border:0;" allowfullscreen loading="lazy"></iframe>
+                        <iframe src="${isiKandungan.toString().trim()}" width="100%" height="600" style="border:0;" allowfullscreen loading="lazy"></iframe>
                     </div>
                 `;
             }
 
-            // Paparkan tajuk dan kandungan akhir ke skrin
             sasaranKandungan.innerHTML = `
                 <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight pb-4 border-b border-gray-100 mb-6">
-                    ${item.tajuk}
+                    ${tajukAkhir}
                 </h3>
                 <div class="space-y-4 text-gray-750 leading-relaxed font-normal text-[16px]">
                     ${paparanKandunganAkhir}
