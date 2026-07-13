@@ -212,6 +212,9 @@
             if(data.length > 0) paparkanKandungan(jenis, 0);
         }
 
+        // Pembolehubah global untuk menyimpan teks carian dokumen
+        let kataKunciCarian = "";
+
         function paparkanKandungan(jenis, index) {
             const sasaranKandungan = document.getElementById(`kandungan-${jenis}`);
             const item = jenis === 'info' ? dataInfoSulh[index] : dataRakanSulh[index];
@@ -225,11 +228,58 @@
                 }
             });
 
-            // Fleksibel: Terima 'tajuk'/'Tajuk' dan 'kandungan'/'Kandungan'
             const tajukAkhir = item.tajuk || item.Tajuk || "";
             let isiKandungan = item.kandungan || item.Kandungan || "";
-            let paparanKandunganAkhir = isiKandungan;
             
+            // Khas untuk Tab Rakan Sulh & Menu Kertas Kerja (Atau kandungan yang mengandungi banyak link)
+            // Kita semak jika kandungan mempunyai banyak link anyflip/dokumen (dipisahkan secara baris baru atau koma)
+            if (tajukAkhir.toLowerCase().includes("kertas kerja") || tajukAkhir.toLowerCase().includes("manual")) {
+                
+                // Bina struktur UI dengan Kotak Carian & Grid Kad yang Premium
+                sasaranKandungan.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-gray-100 mb-6 gap-4">
+                        <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight">
+                            ${tajukAkhir}
+                        </h3>
+                        <div class="relative w-full md:w-72">
+                            <input type="text" id="input-carian-dokumen" oninput="tapisDokumen('${jenis}', ${index})" placeholder="Cari kertas kerja..." 
+                                class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white shadow-sm"
+                                value="${kataKunciCarian}">
+                            <div class="absolute left-3 top-2.5 text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="grid-dokumen" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        </div>
+
+                    <div id="modal-dokumen" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+                        <div class="bg-white rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden shadow-2xl relative animate-fade-in">
+                            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-purple-50">
+                                <h4 id="modal-tajuk" class="text-lg font-bold text-purple-950 truncate pr-8">Tajuk Dokumen</h4>
+                                <button onclick="tutupModalDokumen()" class="text-gray-500 hover:text-red-600 bg-white p-2 rounded-xl border border-gray-100 shadow-sm transition cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="flex-1 bg-gray-50 p-2 relative">
+                                <iframe id="modal-iframe" src="" width="100%" height="100%" style="border:0;" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Paparkan senarai kad buat kali pertama
+                paparkanGridKad(jenis, index);
+                return;
+            }
+
+            // --- PAPARAN STANDARD (Untuk tab biasa/bukan senarai kertas kerja) ---
+            let paparanKandunganAkhir = isiKandungan;
             if (isiKandungan && (isiKandungan.toString().trim().startsWith('http://') || isiKandungan.toString().trim().startsWith('https://'))) {
                 paparanKandunganAkhir = `
                     <div class="w-full overflow-hidden rounded-xl border border-gray-100 shadow-sm bg-white mt-4">
@@ -246,6 +296,111 @@
                     ${paparanKandunganAkhir}
                 </div>
             `;
+        }
+
+        // Fungsi memecahkan link & menjana paparan Kad Premium dengan Tajuk Dinamik
+        function paparkanGridKad(jenis, index) {
+            const item = jenis === 'info' ? dataInfoSulh[index] : dataRakanSulh[index];
+            const isiKandungan = item.kandungan || item.Kandungan || "";
+            const gridContainer = document.getElementById("grid-dokumen");
+            
+            if (!gridContainer) return;
+            gridContainer.innerHTML = "";
+
+            // Pisahkan pautan berdasarkan baris baru atau koma
+            const senaraiPautan = isiKandungan.split(/\r?\n|,/);
+            let adaDokumen = false;
+
+            senaraiPautan.forEach((pautan, idx) => {
+                const barisBersih = pautan.trim();
+                if (barisBersih === "") return;
+
+                let tajukDokumen = "";
+                let linkBersih = "";
+
+                // ⚡ LOGIK PINTAR: Semak jika ada simbol | untuk asingkan Tajuk dan Link
+                if (barisBersih.includes("|")) {
+                    const pecahan = barisBersih.split("|");
+                    tajukDokumen = pecahan[0].trim();  // Ambil teks sebelah kiri sebagai Tajuk
+                    linkBersih = pecahan[1].trim();   // Ambil teks sebelah kanan sebagai Link
+                } else {
+                    // Jika user lupa letak simbol |, kita buat tajuk automatik macam biasa
+                    linkBersih = barisBersih;
+                    tajukDokumen = `Kertas Kerja Bahagian ${idx + 1}`;
+                }
+
+                // Tapis berdasarkan kotak input teks carian (Live Filter)
+                if (kataKunciCarian !== "" && !tajukDokumen.toLowerCase().includes(kataKunciCarian.toLowerCase())) {
+                    return; 
+                }
+
+                adaDokumen = true;
+
+                // Bina Elemen Kad Premium
+                const kad = document.createElement("div");
+                kad.className = "bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between group hover:border-purple-200";
+                
+                kad.innerHTML = `
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="p-3 bg-purple-50 text-purple-700 rounded-xl group-hover:bg-purple-700 group-hover:text-white transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.532.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h5 class="text-base font-bold text-gray-900 leading-snug group-hover:text-purple-950 line-clamp-2">
+                                ${tajukDokumen}
+                            </h5>
+                            <p class="text-xs text-gray-400 mt-1">Format: AnyFlip Document</p>
+                        </div>
+                    </div>
+                    <button onclick="bukaModalDokumen('${tajukDokumen.replace(/'/g, "\\'")}', '${linkBersih}')" 
+                        class="w-full mt-2 text-center text-sm font-semibold bg-gray-50 text-purple-700 hover:bg-purple-700 hover:text-white px-4 py-2.5 rounded-xl transition cursor-pointer border border-gray-100 hover:border-transparent">
+                        Baca Penuh
+                    </button>
+                `;
+                
+                gridContainer.appendChild(kad);
+            });
+
+            if (!adaDokumen) {
+                gridContainer.innerHTML = `
+                    <div class="col-span-full text-center py-8 text-gray-400 text-sm">
+                        Tiada kertas kerja yang sepadan dengan carian "${kataKunciCarian}".
+                    </div>
+                `;
+            }
+        }
+
+        // Fungsi mencetuskan tapis masa-nyata (Live Filtering)
+        function tapisDokumen(jenis, index) {
+            const input = document.getElementById("input-carian-dokumen");
+            if(input) {
+                kataKunciCarian = input.value;
+                paparkanGridKad(jenis, index);
+            }
+        }
+
+        // Fungsi Paparan Tingkat Besar (Modal Dialog Open)
+        function bukaModalDokumen(tajuk, link) {
+            const modal = document.getElementById("modal-dokumen");
+            const modalTajuk = document.getElementById("modal-tajuk");
+            const modalIframe = document.getElementById("modal-iframe");
+            
+            modalTajuk.innerText = tajuk;
+            modalIframe.src = link;
+            modal.classList.remove("hidden");
+            document.body.style.overflow = "hidden"; // Kunci skrin belakang daripada skrol
+        }
+
+        // Fungsi Tutup Paparan Tingkat Besar (Modal Dialog Close)
+        function tutupModalDokumen() {
+            const modal = document.getElementById("modal-dokumen");
+            const modalIframe = document.getElementById("modal-iframe");
+            
+            modal.classList.add("hidden");
+            modalIframe.src = ""; // Set kosong semula untuk stop buffering audio/video fail anyflip
+            document.body.style.overflow = "auto"; // Aktifkan semula skrol asal
         }
 
         window.onload = muatTurunData;
