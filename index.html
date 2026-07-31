@@ -15,125 +15,347 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Supaya gambar duduk paling belakang sekali */
+            z-index: -1;
             background-image: url('assets/bg-korporat.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
-            /* ⚡ TUKAR TRANSPARENT DI SINI: 
-               0.1 bermaksud 20% kejelasan (sangat pudar/transparent). 
-               Kalau nak terang sikit, boleh tukar jadi 0.3 atau 0.4 */
             opacity: 0.4; 
         }
 
-        /* 2. Animasi Marquee Scroller (Kekalkan yang asal) */
+        /* 2. Animasi Marquee Scroller */
         @keyframes marquee {
-            0% { 
-                transform: translateX(0%);
-                left: 100%;
-            }
-            100% { 
-                transform: translateX(-100%);
-                left: 0%;
-            }
+            0% { transform: translateX(0%); left: 100%; }
+            100% { transform: translateX(-100%); left: 0%; }
         }
         
         .animate-marquee {
-            animation: marquee 10s linear infinite;
+            animation: marquee 12s linear infinite;
         }
     </style>
 </head>
 <body class="relative bg-gray-50 text-gray-800 font-sans min-h-screen">
 
-    <!-- ERROR ALERT (Akan muncul kalau API kau ada masalah) -->
+    <!-- ERROR ALERT -->
     <div id="error-alert" class="bg-red-600 text-white p-3 text-center font-bold hidden">
-        Ralat: Gagal menarik data dari Google Sheets. Sila pastikan URL API Sheety anda betul.
+        Ralat: Gagal menyambung ke pangkalan data Google Sheets. Sila semak semula URL API anda.
     </div>
 
-    <!-- 1. SCROLLER BERGERAK (DIPAKSA MULA DARI LUAR SKRIN KANAN) -->
+    <!-- 1. SCROLLER BERGERAK -->
     <div class="relative w-full bg-purple-200 text-purple-950 overflow-hidden h-12 font-semibold shadow-sm flex items-center">
         <div id="scroller-text" class="absolute left-0 whitespace-nowrap inline-block animate-marquee text-lg tracking-wide">
-            Selamat datang ke website RSK...
+            Selamat datang ke Portal Rakan Sulh Komuniti (RSK)...
         </div>
     </div>
 
     <!-- 2. NAVIGATION BAR -->
-    <nav class="bg-white shadow-md sticky top-0 z-50">
+    <nav class="bg-white shadow-md sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex-shrink-0 flex items-center">
-                    <span class="text-2xl font-bold text-teal-700 tracking-wider">PORTAL RAKAN SULH KOMUNITI</span>
+                    <span class="text-2xl font-bold text-purple-900 tracking-wider cursor-pointer" onclick="tukarTab('home')">PORTAL RAKAN SULH KOMUNITI</span>
                 </div>
-                <div class="hidden md:flex space-x-8 font-semibold text-gray-600">
-                    <button onclick="tukarTab('home')" class="hover:text-teal-700 pb-2 border-b-2 border-transparent hover:border-teal-700 transition cursor-pointer">Home</button>
-                    <button onclick="tukarTab('info')" class="hover:text-teal-700 pb-2 border-b-2 border-transparent hover:border-teal-700 transition cursor-pointer">Info Sulh</button>
-                    <button onclick="tukarTab('rakan')" class="hover:text-teal-700 pb-2 border-b-2 border-transparent hover:border-teal-700 transition cursor-pointer">Rakan Sulh Komuniti</button>
+                <div class="hidden md:flex space-x-6 font-semibold text-gray-600 items-center">
+                    <button onclick="tukarTab('home')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Home</button>
+                    <button onclick="tukarTab('info')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Info Sulh</button>
+                    <button onclick="tukarTab('rakan')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Rakan Sulh Komuniti</button>
+                    <button onclick="tukarTab('mohon')" class="bg-purple-700 text-white px-4 py-2 rounded-xl hover:bg-purple-800 transition cursor-pointer shadow-sm">Pendaftaran RSK</button>
+                    <button onclick="tukarTab('semak')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Semak Status</button>
+                    <button onclick="tukarTab('admin')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition cursor-pointer">Admin</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- 3. HEADING IMAGE / HERO BANNER -->
-    <!-- CARI BAHAGIAN INI DAN KOSONGKAN ISI <h1> -->
-    <div id="hero-section" class="relative h-[400px] w-full bg-gray-900 overflow-hidden">
+    <!-- 3. HERO BANNER -->
+    <div id="hero-section" class="relative h-[350px] w-full bg-gray-900 overflow-hidden">
         <img id="heading-image" src="" alt="Corporate Banner" class="w-full h-full object-cover opacity-80 transition-all duration-500">
-        <div class="absolute inset-0 bg-gradient-to-r from-teal-950/80 to-transparent flex items-center">
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-950/80 to-transparent flex items-center">
             <div class="max-w-7xl mx-auto px-4 w-full">
-                <!-- Dah dikosongkan supaya tak keluar teks pelik sementara loading -->
-                <h1 id="welcome-title" class="text-4xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-md"></h1>
+                <h1 id="welcome-title" class="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-md"></h1>
             </div>
         </div>
     </div>
 
     <!-- 4. KANDUNGAN UTAMA -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        <!-- HOME TAB -->
+        <!-- TAB 1: HOME -->
         <div id="tab-home" class="tab-content block">
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-4xl">
-                <h2 class="text-2xl font-bold text-teal-800 mb-4">Selamat Datang</h2>
+                <h2 class="text-2xl font-bold text-purple-900 mb-4">Selamat Datang</h2>
                 <p id="welcome-desc" class="text-gray-600 leading-relaxed text-lg">Memuatkan kandungan maklumat utama...</p>
             </div>
         </div>
 
-        <!-- INFO SULH TAB -->
+        <!-- TAB 2: INFO SULH -->
         <div id="tab-info" class="tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-info">
-                    <!-- Dinamik sub-tajuk -->
-                </div>
+                <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-info"></div>
                 <div class="md:col-span-3 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[400px]">
-                    <div id="kandungan-info" class="prose max-w-none text-gray-700 leading-relaxed">
-                        Pilih sub-tajuk di sebelah kiri untuk melihat maklumat.
-                    </div>
+                    <div id="kandungan-info" class="prose max-w-none text-gray-700 leading-relaxed">Pilih sub-tajuk di sebelah kiri.</div>
                 </div>
             </div>
         </div>
 
-        <!-- RAKAN SULH TAB -->
+        <!-- TAB 3: RAKAN SULH -->
         <div id="tab-rakan" class="tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-rakan">
-                    <!-- Dinamik sub-tajuk -->
-                </div>
+                <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-rakan"></div>
                 <div class="md:col-span-3 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[400px]">
-                    <div id="kandungan-rakan" class="prose max-w-none text-gray-700 leading-relaxed">
-                        Pilih sub-tajuk di sebelah kiri untuk melihat maklumat rakan komuniti.
+                    <div id="kandungan-rakan" class="prose max-w-none text-gray-700 leading-relaxed">Pilih sub-tajuk di sebelah kiri.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: BORANG PERMOHONAN RSK -->
+        <div id="tab-mohon" class="tab-content hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-4xl mx-auto">
+                <div class="border-b pb-4 mb-6">
+                    <h2 class="text-2xl font-bold text-purple-950">📋 BORANG SARINGAN AWAL RAKAN SULH KOMUNITI (RSK)</h2>
+                    <p class="text-sm text-gray-500 mt-1">Jabatan Kehakiman Syariah Malaysia (JKSM)</p>
+                </div>
+
+                <form onsubmit="hantarBorangRSK(event)" class="space-y-6">
+                    <!-- BAHAGIAN A -->
+                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN A: MAKLUMAT PERIBADI & PROFIL</div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">1. Nama Penuh *</label>
+                            <input type="text" id="rsk-nama" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">2. Umur *</label>
+                            <select id="rsk-umur" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                <option value="">Sila Pilih</option>
+                                <option value="21 - 30 tahun">21 - 30 tahun</option>
+                                <option value="31 - 45 tahun">31 - 45 tahun</option>
+                                <option value="46 - 60 tahun">46 - 60 tahun</option>
+                                <option value="61 tahun ke atas">61 tahun ke atas</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">3. Pekerjaan / Bidang Tugas Semasa *</label>
+                            <input type="text" id="rsk-pekerjaan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">4. No. Telefon (WhatsApp) *</label>
+                            <input type="text" id="rsk-notel" required placeholder="Contoh: 0123456789" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">5. Kawasan Kediaman Utama (Negeri, Daerah & Taman) *</label>
+                        <input type="text" id="rsk-kawasan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">6. Peranan dalam Komuniti Semasa *</label>
+                        <select id="rsk-peranan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                            <option value="">Sila Pilih</option>
+                            <option value="AJK KRT / Persatuan Penduduk">AJK KRT / Persatuan Penduduk</option>
+                            <option value="AJK Masjid / Surau">AJK Masjid / Surau</option>
+                            <option value="Sukarelawan NGO">Sukarelawan NGO</option>
+                            <option value="Pemimpin Belia / Wanita">Pemimpin Belia / Wanita</option>
+                            <option value="Tiada peranan rasmi">Tiada peranan rasmi (Penduduk setempat)</option>
+                        </select>
+                    </div>
+
+                    <!-- BAHAGIAN B -->
+                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN B: PENGLIBATAN & KEMAHIRAN AWAL</div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">7. Penglibatan aktiviti sukarelawan sebelum ini? *</label>
+                        <select id="rsk-penglibatan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                            <option value="">Sila Pilih</option>
+                            <option value="Ya, aktif sehingga kini">Ya, aktif sehingga kini</option>
+                            <option value="Pernah, tetapi tidak aktif lagi">Pernah, tetapi tidak aktif lagi</option>
+                            <option value="Belum pernah, tetapi sangat teringin">Belum pernah, tetapi sangat teringin</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">8. Pernah ikuti latihan Sulh/Mediasi? *</label>
+                            <select id="rsk-latihan" required onchange="toggleNamaKursus(this.value)" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                <option value="">Sila Pilih</option>
+                                <option value="Pernah">Pernah</option>
+                                <option value="Tidak Pernah">Tidak Pernah</option>
+                            </select>
+                        </div>
+                        <div id="kotak-nama-kursus" class="hidden">
+                            <label class="block text-sm font-semibold mb-1">9. Nyatakan nama kursus</label>
+                            <input type="text" id="rsk-nama-kursus" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">10. Keyakinan berhadapan konflik (Skala 1 - 10) *</label>
+                        <input type="range" id="rsk-keyakinan" min="1" max="10" value="5" oninput="document.getElementById('val-keyakinan').innerText = this.value" class="w-full accent-purple-700">
+                        <div class="text-center font-bold text-purple-900 text-lg" id="val-keyakinan">5</div>
+                        <p class="text-xs text-gray-400 text-center">[1-2 Sangat Takut] [3-4 Kurang Yakin] [5-6 Sederhana] [7-8 Yakin] [9-10 Sangat Yakin]</p>
+                    </div>
+
+                    <!-- BAHAGIAN C -->
+                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN C: MINAT & KECENDERUNGAN</div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">11. Mengapa anda BERMINAT menyertai RSK? (Boleh pilih lebih daripada 1) *</label>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Mahu bantu komuniti" class="rounded text-purple-600"> Mahu membantu komuniti menyelesaikan konflik secara damai</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Mendalami ilmu Sulh" class="rounded text-purple-600"> Berminat mendalami ilmu & kemahiran Sulh Kekeluargaan Islam</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Rujukan awal masyarakat" class="rounded text-purple-600"> Menjadi titik rujukan awal sebelum kes dibawa ke Mahkamah</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">12. Kualiti PALING UTAMA bagi seorang RSK? *</label>
+                        <select id="rsk-kualiti" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                            <option value="">Sila Pilih</option>
+                            <option value="Pandai bercakap dan bagi nasihat">Pandai bercakap dan bagi nasihat</option>
+                            <option value="Neutral dan pendengar yang baik">Neutral dan pendengar yang baik</option>
+                            <option value="Tegas dan cepat buat keputusan">Tegas dan cepat buat keputusan</option>
+                            <option value="Mempunyai jawatan tinggi">Mempunyai jawatan tinggi</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">13. Pendekatan AWAL isu perbalahan jiran pasal parking? *</label>
+                        <select id="rsk-situasi" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                            <option value="">Sila Pilih</option>
+                            <option value="Tegur kedua-duanya & minta beredar">Tegur kedua-duanya & minta beredar</option>
+                            <option value="Mendengar luahan kedua-dua secara tenang & cari jalan tengah">Mendengar luahan kedua-dua secara tenang & cari jalan tengah</option>
+                            <option value="Menyebelahi jiran yang lebih tua/dikenali">Menyebelahi jiran yang lebih tua/dikenali</option>
+                            <option value="Menyuruh terus buat laporan polis">Menyuruh terus buat laporan polis</option>
+                        </select>
+                    </div>
+
+                    <!-- BAHAGIAN D -->
+                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN D: KOMITMEN MASA & KESEDIAAN</div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">14. Kesediaan ikuti Sesi Latihan Khas? *</label>
+                            <select id="rsk-hadir" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                <option value="">Sila Pilih</option>
+                                <option value="Ya, bersedia sepenuhnya">Ya, bersedia sepenuhnya</option>
+                                <option value="Boleh hadir, bergantung tarikh">Boleh hadir, bergantung tarikh</option>
+                                <option value="Tidak pasti">Tidak pasti</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">15. Anggaran masa sukarela sebulan? *</label>
+                            <select id="rsk-masa" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                <option value="">Sila Pilih</option>
+                                <option value="1 - 3 jam sebulan">1 - 3 jam sebulan</option>
+                                <option value="4 - 8 jam sebulan">4 - 8 jam sebulan</option>
+                                <option value="Lebih 8 jam sebulan">Lebih 8 jam sebulan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">16. Ringkasan mengapa anda wajar dipilih *</label>
+                        <textarea id="rsk-ringkasan" required rows="3" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white"></textarea>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="w-full bg-purple-700 text-white font-bold py-3 rounded-xl hover:bg-purple-800 transition cursor-pointer shadow-md">
+                        Hantar Permohonan
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 5: SEMAKAN STATUS (AWAM) -->
+        <div id="tab-semak" class="tab-content hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-xl mx-auto">
+                <h2 class="text-2xl font-bold text-purple-950 mb-2">Semakan Status Permohonan</h2>
+                <p class="text-sm text-gray-500 mb-6">Masukkan ID Permohonan atau No. Telefon anda.</p>
+
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="input-semak-id" placeholder="Contoh: RSK-123456 atau No HP" class="flex-1 p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600">
+                    <button onclick="prosesSemakStatus()" class="bg-purple-700 text-white px-5 py-2.5 rounded-xl hover:bg-purple-800 font-bold transition cursor-pointer">Cari</button>
+                </div>
+
+                <div id="hasil-semakan" class="hidden"></div>
+            </div>
+        </div>
+
+        <!-- TAB 6: PORTAL ADMIN URUSETIA -->
+        <div id="tab-admin" class="tab-content hidden">
+            <!-- SKRIN LOGIN ADMIN -->
+            <div id="admin-login-box" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-md mx-auto">
+                <h2 class="text-xl font-bold text-purple-950 mb-4 text-center">Log Masuk Panel Admin</h2>
+                <form onsubmit="prosesLoginAdmin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">ID Pengguna</label>
+                        <input type="text" id="admin-user" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Kata Laluan</label>
+                        <input type="password" id="admin-pass" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-purple-700 text-white font-bold py-2.5 rounded-xl hover:bg-purple-800 transition cursor-pointer">Masuk</button>
+                </form>
+            </div>
+
+            <!-- DASHBOARD ADMIN (LOCKED) -->
+            <div id="admin-dashboard" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-purple-950">Dashboard Pengurusan Admin RSK</h2>
+                        <p class="text-sm text-gray-500">Selamat datang, <span id="nama-admin-aktif" class="font-bold text-purple-700"></span></p>
+                    </div>
+                    <button onclick="logoutAdmin()" class="text-xs bg-red-100 text-red-600 px-3 py-2 rounded-xl font-bold hover:bg-red-200 transition cursor-pointer">Log Keluar</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="bg-purple-50 text-purple-900 border-b">
+                            <tr>
+                                <th class="p-3">ID / Tarikh</th>
+                                <th class="p-3">Nama Peserta</th>
+                                <th class="p-3">No. Tel & Kawasan</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-center">Tindakan Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jadual-admin-body" class="divide-y">
+                            <!-- Dijana Dinamik -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
     </main>
 
+    <!-- MODAL POPUP -->
+    <div id="modal-dokumen" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden shadow-2xl relative">
+            <div class="p-4 border-b flex justify-between items-center bg-purple-50">
+                <h4 id="modal-tajuk" class="text-lg font-bold text-purple-950 truncate pr-8">Tajuk Dokumen</h4>
+                <button onclick="tutupModalDokumen()" class="text-gray-500 hover:text-red-600 bg-white p-2 rounded-xl border transition cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="flex-1 bg-gray-50 p-2 relative">
+                <iframe id="modal-iframe" src="" width="100%" height="100%" style="border:0;" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // URL API Sheety kau
-        // ⚡ GANTIKAN DENGAN URL GOOGLE APPS SCRIPT KAU YANG BARU TADI:
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4xUcYJifvtli3CNzDUvNRsoDfYjimUdxpKoYESmM8HgtDsM_mYtqHOuC_oEKCNpX5tQ/exec";
 
         let dataInfoSulh = [];
         let dataRakanSulh = [];
+        let mentahDataSemua = {};
+        let kataKunciCarian = "";
 
         function tukarTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -152,16 +374,14 @@
                 const respon = await fetch(GOOGLE_SCRIPT_URL);
                 if (!respon.ok) throw new Error("Gagal menyambung ke Google Sheets");
                 
-                const semuaData = await respon.json();
-                console.log("Data Berjaya Diterima:", semuaData);
+                mentahDataSemua = await respon.json();
+                console.log("Data Diterima:", mentahDataSemua);
 
-                // 1. Proses HalamanUtama
-                if (semuaData.HalamanUtama) {
-                    semuaData.HalamanUtama.forEach(item => {
-                        // Fleksibel: Terima 'key'/'Key' dan 'value'/'Value'
+                // 1. Halaman Utama
+                if (mentahDataSemua.HalamanUtama) {
+                    mentahDataSemua.HalamanUtama.forEach(item => {
                         const k = item.key || item.Key;
                         const v = item.value || item.Value || "";
-                        
                         if(k === 'heading_image') document.getElementById('heading-image').src = v;
                         if(k === 'scroller_text') document.getElementById('scroller-text').innerText = v;
                         if(k === 'welcome_title') document.getElementById('welcome-title').innerText = v;
@@ -169,21 +389,15 @@
                     });
                 }
 
-                // 2. Proses MenuInfoSulh
-                if (semuaData.MenuInfoSulh) {
-                    dataInfoSulh = semuaData.MenuInfoSulh.filter(item => {
-                        const statusVal = item.status || item.Status;
-                        return statusVal && statusVal.toString().toLowerCase() === 'aktif';
-                    });
+                // 2. Info Sulh
+                if (mentahDataSemua.MenuInfoSulh) {
+                    dataInfoSulh = mentahDataSemua.MenuInfoSulh.filter(item => (item.status || item.Status || "").toString().toLowerCase() === 'aktif');
                     binaSidebar('info', dataInfoSulh);
                 }
 
-                // 3. Proses MenuRakanSulh
-                if (semuaData.MenuRakanSulh) {
-                    dataRakanSulh = semuaData.MenuRakanSulh.filter(item => {
-                        const statusVal = item.status || item.Status;
-                        return statusVal && statusVal.toString().toLowerCase() === 'aktif';
-                    });
+                // 3. Rakan Sulh
+                if (mentahDataSemua.MenuRakanSulh) {
+                    dataRakanSulh = mentahDataSemua.MenuRakanSulh.filter(item => (item.status || item.Status || "").toString().toLowerCase() === 'aktif');
                     binaSidebar('rakan', dataRakanSulh);
                 }
 
@@ -202,8 +416,6 @@
             data.forEach((item, index) => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
-                
-                // Fleksibel: Terima 'tajuk' atau 'Tajuk'
                 btn.innerText = item.tajuk || item.Tajuk || "Tiada Tajuk";
                 btn.onclick = () => paparkanKandungan(jenis, index);
                 container.appendChild(btn);
@@ -212,102 +424,56 @@
             if(data.length > 0) paparkanKandungan(jenis, 0);
         }
 
-        // Pembolehubah global untuk menyimpan teks carian dokumen
-        let kataKunciCarian = "";
-
         function paparkanKandungan(jenis, index) {
             const sasaranKandungan = document.getElementById(`kandungan-${jenis}`);
             const item = jenis === 'info' ? dataInfoSulh[index] : dataRakanSulh[index];
             
             const butangButang = document.getElementById(`sidebar-${jenis}`).querySelectorAll('button');
             butangButang.forEach((btn, idx) => {
-                if(idx === index) {
-                    btn.className = "w-full text-left px-4 py-3 rounded-xl font-bold bg-purple-700 text-white cursor-pointer shadow-sm";
-                } else {
-                    btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
-                }
+                btn.className = (idx === index) ? 
+                    "w-full text-left px-4 py-3 rounded-xl font-bold bg-purple-700 text-white cursor-pointer shadow-sm" : 
+                    "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
             });
 
             const tajukAkhir = item.tajuk || item.Tajuk || "";
             let isiKandungan = item.kandungan || item.Kandungan || "";
             
-            // Khas untuk Tab Rakan Sulh & Menu Kertas Kerja (Atau kandungan yang mengandungi banyak link)
-            // Kita semak jika kandungan mempunyai banyak link anyflip/dokumen (dipisahkan secara baris baru atau koma)
             if (tajukAkhir.toLowerCase().includes("kertas kerja") || tajukAkhir.toLowerCase().includes("manual")) {
-                
-                // Bina struktur UI dengan Kotak Carian & Grid Kad yang Premium
                 sasaranKandungan.innerHTML = `
                     <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-gray-100 mb-6 gap-4">
-                        <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight">
-                            ${tajukAkhir}
-                        </h3>
+                        <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight">${tajukAkhir}</h3>
                         <div class="relative w-full md:w-72">
                             <input type="text" id="input-carian-dokumen" oninput="tapisDokumen('${jenis}', ${index})" placeholder="Cari kertas kerja..." 
-                                class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white shadow-sm"
-                                value="${kataKunciCarian}">
+                                class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm bg-white shadow-sm" value="${kataKunciCarian}">
                             <div class="absolute left-3 top-2.5 text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
                         </div>
                     </div>
-                    
-                    <div id="grid-dokumen" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                        </div>
-
-                    <div id="modal-dokumen" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-                        <div class="bg-white rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden shadow-2xl relative animate-fade-in">
-                            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-purple-50">
-                                <h4 id="modal-tajuk" class="text-lg font-bold text-purple-950 truncate pr-8">Tajuk Dokumen</h4>
-                                <button onclick="tutupModalDokumen()" class="text-gray-500 hover:text-red-600 bg-white p-2 rounded-xl border border-gray-100 shadow-sm transition cursor-pointer">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="flex-1 bg-gray-50 p-2 relative">
-                                <iframe id="modal-iframe" src="" width="100%" height="100%" style="border:0;" allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="grid-dokumen" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4"></div>
                 `;
-                
-                // Paparkan senarai kad buat kali pertama
                 paparkanGridKad(jenis, index);
                 return;
             }
 
-            // --- PAPARAN STANDARD (Untuk tab biasa/bukan senarai kertas kerja) ---
             let paparanKandunganAkhir = isiKandungan;
             if (isiKandungan && (isiKandungan.toString().trim().startsWith('http://') || isiKandungan.toString().trim().startsWith('https://'))) {
-                paparanKandunganAkhir = `
-                    <div class="w-full overflow-hidden rounded-xl border border-gray-100 shadow-sm bg-white mt-4">
-                        <iframe src="${isiKandungan.toString().trim()}" width="100%" height="600" style="border:0;" allowfullscreen loading="lazy"></iframe>
-                    </div>
-                `;
+                paparanKandunganAkhir = `<div class="w-full overflow-hidden rounded-xl border shadow-sm bg-white mt-4"><iframe src="${isiKandungan.toString().trim()}" width="100%" height="600" style="border:0;" allowfullscreen loading="lazy"></iframe></div>`;
             }
 
             sasaranKandungan.innerHTML = `
-                <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight pb-4 border-b border-gray-100 mb-6">
-                    ${tajukAkhir}
-                </h3>
-                <div class="space-y-4 text-gray-750 leading-relaxed font-normal text-[16px]">
-                    ${paparanKandunganAkhir}
-                </div>
+                <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight pb-4 border-b mb-6">${tajukAkhir}</h3>
+                <div class="space-y-4 text-gray-750 leading-relaxed font-normal text-[16px]">${paparanKandunganAkhir}</div>
             `;
         }
 
-        // Fungsi memecahkan link & menjana paparan Kad Premium dengan Tajuk Dinamik
         function paparkanGridKad(jenis, index) {
             const item = jenis === 'info' ? dataInfoSulh[index] : dataRakanSulh[index];
             const isiKandungan = item.kandungan || item.Kandungan || "";
             const gridContainer = document.getElementById("grid-dokumen");
-            
             if (!gridContainer) return;
             gridContainer.innerHTML = "";
 
-            // Pisahkan pautan berdasarkan baris baru atau koma
             const senaraiPautan = isiKandungan.split(/\r?\n|,/);
             let adaDokumen = false;
 
@@ -318,89 +484,227 @@
                 let tajukDokumen = "";
                 let linkBersih = "";
 
-                // ⚡ LOGIK PINTAR: Semak jika ada simbol | untuk asingkan Tajuk dan Link
                 if (barisBersih.includes("|")) {
                     const pecahan = barisBersih.split("|");
-                    tajukDokumen = pecahan[0].trim();  // Ambil teks sebelah kiri sebagai Tajuk
-                    linkBersih = pecahan[1].trim();   // Ambil teks sebelah kanan sebagai Link
+                    tajukDokumen = pecahan[0].trim();
+                    linkBersih = pecahan[1].trim();
                 } else {
-                    // Jika user lupa letak simbol |, kita buat tajuk automatik macam biasa
                     linkBersih = barisBersih;
                     tajukDokumen = `Kertas Kerja Bahagian ${idx + 1}`;
                 }
 
-                // Tapis berdasarkan kotak input teks carian (Live Filter)
-                if (kataKunciCarian !== "" && !tajukDokumen.toLowerCase().includes(kataKunciCarian.toLowerCase())) {
-                    return; 
-                }
+                if (kataKunciCarian !== "" && !tajukDokumen.toLowerCase().includes(kataKunciCarian.toLowerCase())) return;
 
                 adaDokumen = true;
-
-                // Bina Elemen Kad Premium
                 const kad = document.createElement("div");
                 kad.className = "bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between group hover:border-purple-200";
-                
                 kad.innerHTML = `
                     <div class="flex items-start gap-4 mb-4">
                         <div class="p-3 bg-purple-50 text-purple-700 rounded-xl group-hover:bg-purple-700 group-hover:text-white transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.532.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.532.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h5 class="text-base font-bold text-gray-900 leading-snug group-hover:text-purple-950 line-clamp-2">
-                                ${tajukDokumen}
-                            </h5>
+                            <h5 class="text-base font-bold text-gray-900 group-hover:text-purple-950 line-clamp-2">${tajukDokumen}</h5>
                             <p class="text-xs text-gray-400 mt-1">Format: AnyFlip Document</p>
                         </div>
                     </div>
-                    <button onclick="bukaModalDokumen('${tajukDokumen.replace(/'/g, "\\'")}', '${linkBersih}')" 
-                        class="w-full mt-2 text-center text-sm font-semibold bg-gray-50 text-purple-700 hover:bg-purple-700 hover:text-white px-4 py-2.5 rounded-xl transition cursor-pointer border border-gray-100 hover:border-transparent">
-                        Baca Penuh
-                    </button>
+                    <button onclick="bukaModalDokumen('${tajukDokumen.replace(/'/g, "\\'")}', '${linkBersih}')" class="w-full mt-2 text-center text-sm font-semibold bg-gray-50 text-purple-700 hover:bg-purple-700 hover:text-white px-4 py-2.5 rounded-xl transition border hover:border-transparent cursor-pointer">Baca Penuh</button>
                 `;
-                
                 gridContainer.appendChild(kad);
             });
 
-            if (!adaDokumen) {
-                gridContainer.innerHTML = `
-                    <div class="col-span-full text-center py-8 text-gray-400 text-sm">
-                        Tiada kertas kerja yang sepadan dengan carian "${kataKunciCarian}".
-                    </div>
-                `;
-            }
+            if (!adaDokumen) gridContainer.innerHTML = `<div class="col-span-full text-center py-8 text-gray-400 text-sm">Tiada kertas kerja sepadan.</div>`;
         }
 
-        // Fungsi mencetuskan tapis masa-nyata (Live Filtering)
         function tapisDokumen(jenis, index) {
             const input = document.getElementById("input-carian-dokumen");
-            if(input) {
-                kataKunciCarian = input.value;
-                paparkanGridKad(jenis, index);
+            if(input) { kataKunciCarian = input.value; paparkanGridKad(jenis, index); }
+        }
+
+        function bukaModalDokumen(tajuk, link) {
+            document.getElementById("modal-tajuk").innerText = tajuk;
+            document.getElementById("modal-iframe").src = link;
+            document.getElementById("modal-dokumen").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+        }
+
+        function tutupModalDokumen() {
+            document.getElementById("modal-dokumen").classList.add("hidden");
+            document.getElementById("modal-iframe").src = "";
+            document.body.style.overflow = "auto";
+        }
+
+        // --- BANTUAN BORANG RSK ---
+        function toggleNamaKursus(val) {
+            const box = document.getElementById('kotak-nama-kursus');
+            if(val === 'Pernah') box.classList.remove('hidden');
+            else box.classList.add('hidden');
+        }
+
+        async function hantarBorangRSK(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.innerText = "Sila tunggu...";
+
+            const payload = {
+                nama: document.getElementById('rsk-nama').value,
+                umur: document.getElementById('rsk-umur').value,
+                pekerjaan: document.getElementById('rsk-pekerjaan').value,
+                notel: document.getElementById('rsk-notel').value,
+                kawasan: document.getElementById('rsk-kawasan').value,
+                peranan: document.getElementById('rsk-peranan').value,
+                penglibatan: document.getElementById('rsk-penglibatan').value,
+                latihan: document.getElementById('rsk-latihan').value,
+                namaKursus: document.getElementById('rsk-nama-kursus').value,
+                keyakinan: document.getElementById('rsk-keyakinan').value,
+                sebabBerminat: Array.from(document.querySelectorAll('input[name="sebab"]:checked')).map(cb => cb.value).join(', '),
+                kualiti: document.getElementById('rsk-kualiti').value,
+                situasi: document.getElementById('rsk-situasi').value,
+                komitmenHadir: document.getElementById('rsk-hadir').value,
+                komitmenMasa: document.getElementById('rsk-masa').value,
+                ringkasan: document.getElementById('rsk-ringkasan').value
+            };
+
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const hasil = await res.json();
+                if(hasil.status === 'success') {
+                    alert(`Permohonan Berjaya Hantar!\nID Permohonan Anda: ${hasil.idPermohonan}\nSila simpan ID ini untuk semakan status.`);
+                    e.target.reset();
+                    tukarTab('semak');
+                    document.getElementById('input-semak-id').value = hasil.idPermohonan;
+                    prosesSemakStatus();
+                } else {
+                    alert("Ralat: " + hasil.message);
+                }
+            } catch (err) {
+                alert("Gagal menghantar borang. Sila semak semula koneksi.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Hantar Permohonan";
             }
         }
 
-        // Fungsi Paparan Tingkat Besar (Modal Dialog Open)
-        function bukaModalDokumen(tajuk, link) {
-            const modal = document.getElementById("modal-dokumen");
-            const modalTajuk = document.getElementById("modal-tajuk");
-            const modalIframe = document.getElementById("modal-iframe");
-            
-            modalTajuk.innerText = tajuk;
-            modalIframe.src = link;
-            modal.classList.remove("hidden");
-            document.body.style.overflow = "hidden"; // Kunci skrin belakang daripada skrol
+        // --- SEMAKAN STATUS AWAM ---
+        async function prosesSemakStatus() {
+            const input = document.getElementById('input-semak-id').value.trim();
+            const box = document.getElementById('hasil-semakan');
+            if(!input) return alert("Sila masukkan ID Permohonan atau No Tel!");
+
+            box.classList.remove('hidden');
+            box.innerHTML = `<p class="text-gray-400 text-sm text-center">Mencari rekod...</p>`;
+
+            await muatTurunData(); // Refresh data terkini
+            const dataRSK = mentahDataSemua.PermohonanRSK || [];
+            const padan = dataRSK.find(i => (i.ID_Permohonan || '').toString().toLowerCase() === input.toLowerCase() || (i.NoTel || '').toString() === input);
+
+            if(padan) {
+                let badge = "bg-yellow-100 text-yellow-800";
+                if(padan.Status === "LULUS") badge = "bg-green-100 text-green-800";
+                if(padan.Status === "TOLAK") badge = "bg-red-100 text-red-800";
+                if(padan.Status === "KIV") badge = "bg-blue-100 text-blue-800";
+
+                box.innerHTML = `
+                    <div class="p-5 border rounded-xl bg-purple-50/30">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-base text-gray-900">${padan.Nama}</h4>
+                                <p class="text-xs text-gray-500">ID: ${padan.ID_Permohonan} | Tarikh: ${padan.Tarikh}</p>
+                            </div>
+                            <span class="px-3 py-1 text-xs font-extrabold rounded-full ${badge}">${padan.Status}</span>
+                        </div>
+                        ${padan.CatatanUrusetia ? `<p class="mt-3 text-xs bg-white p-3 rounded-lg border text-gray-600"><strong>Catatan Urusetia:</strong> ${padan.CatatanUrusetia}</p>` : ''}
+                    </div>
+                `;
+            } else {
+                box.innerHTML = `<p class="text-red-500 text-sm text-center">Tiada permohonan dijumpai untuk "${input}".</p>`;
+            }
         }
 
-        // Fungsi Tutup Paparan Tingkat Besar (Modal Dialog Close)
-        function tutupModalDokumen() {
-            const modal = document.getElementById("modal-dokumen");
-            const modalIframe = document.getElementById("modal-iframe");
+        // --- PORTAL URUSETIA / ADMIN ---
+        function prosesLoginAdmin(e) {
+            e.preventDefault();
+            const u = document.getElementById('admin-user').value.trim();
+            const p = document.getElementById('admin-pass').value.trim();
             
-            modal.classList.add("hidden");
-            modalIframe.src = ""; // Set kosong semula untuk stop buffering audio/video fail anyflip
-            document.body.style.overflow = "auto"; // Aktifkan semula skrol asal
+            const senaraiAdmin = mentahDataSemua.Admin || [];
+            const sah = senaraiAdmin.find(a => (a.Username || '').toString() === u && (a.Password || '').toString() === p);
+
+            if(sah) {
+                document.getElementById('admin-login-box').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                document.getElementById('nama-admin-aktif').innerText = sah.Nama || u;
+                binaJadualAdmin();
+            } else {
+                alert("ID Pengguna atau Kata Laluan Salah!");
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('admin-login-box').classList.remove('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+        }
+
+        function binaJadualAdmin() {
+            const tbody = document.getElementById('jadual-admin-body');
+            tbody.innerHTML = "";
+            const dataRSK = mentahDataSemua.PermohonanRSK || [];
+
+            if(dataRSK.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Tiada permohonan diterima lagi.</td></tr>`;
+                return;
+            }
+
+            dataRSK.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="font-bold text-xs text-purple-900">${item.ID_Permohonan}</div>
+                        <div class="text-xs text-gray-400">${item.Tarikh}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="font-bold text-gray-900">${item.Nama}</div>
+                        <div class="text-xs text-gray-500">${item.Umur} | ${item.Pekerjaan}</div>
+                    </td>
+                    <td class="p-3 text-xs">
+                        <div>📞 ${item.NoTel}</div>
+                        <div class="text-gray-500">📍 ${item.Kawasan}</div>
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 text-xs font-bold rounded-md ${item.Status === 'LULUS' ? 'bg-green-100 text-green-800' : item.Status === 'TOLAK' ? 'bg-red-100 text-red-800' : item.Status === 'KIV' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}">${item.Status}</span>
+                    </td>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="kemaskiniStatus('${item.ID_Permohonan}', 'LULUS')" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 cursor-pointer">Lulus</button>
+                        <button onclick="kemaskiniStatus('${item.ID_Permohonan}', 'KIV')" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 cursor-pointer">KIV</button>
+                        <button onclick="kemaskiniStatus('${item.ID_Permohonan}', 'TOLAK')" class="bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700 cursor-pointer">Tolak</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function kemaskiniStatus(idPermohonan, statusBaru) {
+            const nota = prompt(`Catatan Urusetia untuk [${idPermohonan}] (Opsional):`);
+            if (nota === null) return; // Batal jika tekan cancel
+
+            const payload = {
+                action: "updateStatus",
+                idPermohonan: idPermohonan,
+                statusBaru: statusBaru,
+                catatan: nota
+            };
+
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const hasil = await res.json();
+                alert(hasil.message);
+                await muatTurunData();
+                binaJadualAdmin();
+            } catch (err) {
+                alert("Gagal mengemaskini status.");
+            }
         }
 
         window.onload = muatTurunData;
