@@ -1,3 +1,4 @@
+//https://script.google.com/macros/s/AKfycbxzi2KEfaseyPkoGXLOtA1Kfnt35U8q_GO146lb_e98rvJaj1Dy4gSFNeSnO1LYnICf2Q/exec
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -7,7 +8,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* 1. Teknik Gambar Latar Belakang Transparent/Pudar */
+        /* 1. Gambar Latar Belakang Pudar */
         body::before {
             content: "";
             position: fixed;
@@ -37,7 +38,7 @@
 <body class="relative bg-gray-50 text-gray-800 font-sans min-h-screen">
 
     <!-- ERROR ALERT -->
-    <div id="error-alert" class="bg-red-600 text-white p-3 text-center font-bold hidden">
+    <div id="error-alert" class="bg-red-600 text-white p-3 text-center font-bold hidden z-50 relative">
         Ralat: Gagal menyambung ke pangkalan data Google Sheets. Sila semak semula URL API anda.
     </div>
 
@@ -48,7 +49,7 @@
         </div>
     </div>
 
-    <!-- 2. NAVIGATION BAR -->
+    <!-- 2. NAVIGATION BAR UTAMA -->
     <nav class="bg-white shadow-md sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
@@ -59,8 +60,6 @@
                     <button onclick="tukarTab('home')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Home</button>
                     <button onclick="tukarTab('info')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Info Sulh</button>
                     <button onclick="tukarTab('rakan')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Rakan Sulh Komuniti</button>
-                    <button onclick="tukarTab('mohon')" class="bg-purple-700 text-white px-4 py-2 rounded-xl hover:bg-purple-800 transition cursor-pointer shadow-sm">Pendaftaran RSK</button>
-                    <button onclick="tukarTab('semak')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Semak Status</button>
                     <button onclick="tukarTab('admin')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition cursor-pointer">Admin</button>
                 </div>
             </div>
@@ -84,7 +83,7 @@
         <div id="tab-home" class="tab-content block">
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-4xl">
                 <h2 class="text-2xl font-bold text-purple-900 mb-4">Selamat Datang</h2>
-                <p id="welcome-desc" class="text-gray-600 leading-relaxed text-lg">Memuatkan kandungan maklumat utama...</p>
+                <div id="welcome-desc" class="text-gray-600 leading-relaxed text-lg">Memuatkan kandungan maklumat utama...</div>
             </div>
         </div>
 
@@ -98,198 +97,203 @@
             </div>
         </div>
 
-        <!-- TAB 3: RAKAN SULH -->
+        <!-- TAB 3: RAKAN SULH KOMUNITI -->
         <div id="tab-rakan" class="tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- SIDEBAR DINAMIK RSK -->
                 <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-rakan"></div>
+                
+                <!-- PAPARAN KANDUNGAN UTAMA RSK -->
                 <div class="md:col-span-3 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[400px]">
-                    <div id="kandungan-rakan" class="prose max-w-none text-gray-700 leading-relaxed">Pilih sub-tajuk di sebelah kiri.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 4: BORANG PERMOHONAN RSK -->
-        <div id="tab-mohon" class="tab-content hidden">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-4xl mx-auto">
-                <div class="border-b pb-4 mb-6">
-                    <h2 class="text-2xl font-bold text-purple-950">📋 BORANG SARINGAN AWAL RAKAN SULH KOMUNITI (RSK)</h2>
-                    <p class="text-sm text-gray-500 mt-1">Jabatan Kehakiman Syariah Malaysia (JKSM)</p>
-                </div>
-
-                <form onsubmit="hantarBorangRSK(event)" class="space-y-6">
-                    <!-- BAHAGIAN A -->
-                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN A: MAKLUMAT PERIBADI & PROFIL</div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold mb-1">1. Nama Penuh *</label>
-                            <input type="text" id="rsk-nama" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                    <!-- A. KANDUNGAN MODUL LAIN / KERTAS KERJA -->
+                    <div id="kandungan-rakan-standard" class="prose max-w-none text-gray-700 leading-relaxed">
+                        Pilih sub-tajuk di sebelah kiri untuk melihat maklumat.
+                    </div>
+
+                    <!-- B. FORM PENDAFTARAN RSK (SUB-MENU RSK) -->
+                    <div id="kandungan-rakan-mohon" class="hidden">
+                        <div class="border-b pb-4 mb-6">
+                            <h2 class="text-2xl font-bold text-purple-950">📋 BORANG SARINGAN AWAL RAKAN SULH KOMUNITI (RSK)</h2>
+                            <p class="text-sm text-gray-500 mt-1">Jabatan Kehakiman Syariah Malaysia (JKSM)</p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold mb-1">2. Umur *</label>
-                            <select id="rsk-umur" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                                <option value="">Sila Pilih</option>
-                                <option value="21 - 30 tahun">21 - 30 tahun</option>
-                                <option value="31 - 45 tahun">31 - 45 tahun</option>
-                                <option value="46 - 60 tahun">46 - 60 tahun</option>
-                                <option value="61 tahun ke atas">61 tahun ke atas</option>
-                            </select>
+
+                        <form onsubmit="hantarBorangRSK(event)" class="space-y-6">
+                            <!-- BAHAGIAN A -->
+                            <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN A: MAKLUMAT PERIBADI & PROFIL</div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">1. Nama Penuh *</label>
+                                    <input type="text" id="rsk-nama" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">2. Umur *</label>
+                                    <select id="rsk-umur" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                        <option value="">Sila Pilih</option>
+                                        <option value="21 - 30 tahun">21 - 30 tahun</option>
+                                        <option value="31 - 45 tahun">31 - 45 tahun</option>
+                                        <option value="46 - 60 tahun">46 - 60 tahun</option>
+                                        <option value="61 tahun ke atas">61 tahun ke atas</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">3. Pekerjaan / Bidang Tugas Semasa *</label>
+                                    <input type="text" id="rsk-pekerjaan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">4. No. Telefon (WhatsApp) *</label>
+                                    <input type="text" id="rsk-notel" required placeholder="Contoh: 0123456789" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">5. Kawasan Kediaman Utama (Negeri, Daerah & Taman) *</label>
+                                <input type="text" id="rsk-kawasan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">6. Peranan dalam Komuniti Semasa *</label>
+                                <select id="rsk-peranan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                    <option value="">Sila Pilih</option>
+                                    <option value="AJK KRT / Persatuan Penduduk">AJK KRT / Persatuan Penduduk</option>
+                                    <option value="AJK Masjid / Surau">AJK Masjid / Surau</option>
+                                    <option value="Sukarelawan NGO">Sukarelawan NGO</option>
+                                    <option value="Pemimpin Belia / Wanita">Pemimpin Belia / Wanita</option>
+                                    <option value="Tiada peranan rasmi">Tiada peranan rasmi (Penduduk setempat)</option>
+                                </select>
+                            </div>
+
+                            <!-- BAHAGIAN B -->
+                            <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN B: PENGLIBATAN & KEMAHIRAN AWAL</div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">7. Penglibatan aktiviti sukarelawan sebelum ini? *</label>
+                                <select id="rsk-penglibatan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                    <option value="">Sila Pilih</option>
+                                    <option value="Ya, aktif sehingga kini">Ya, aktif sehingga kini</option>
+                                    <option value="Pernah, tetapi tidak aktif lagi">Pernah, tetapi tidak aktif lagi</option>
+                                    <option value="Belum pernah, tetapi sangat teringin">Belum pernah, tetapi sangat teringin</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">8. Pernah ikuti latihan Sulh/Mediasi? *</label>
+                                    <select id="rsk-latihan" required onchange="toggleNamaKursus(this.value)" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                        <option value="">Sila Pilih</option>
+                                        <option value="Pernah">Pernah</option>
+                                        <option value="Tidak Pernah">Tidak Pernah</option>
+                                    </select>
+                                </div>
+                                <div id="kotak-nama-kursus" class="hidden">
+                                    <label class="block text-sm font-semibold mb-1">9. Nyatakan nama kursus</label>
+                                    <input type="text" id="rsk-nama-kursus" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">10. Keyakinan berhadapan konflik (Skala 1 - 10) *</label>
+                                <input type="range" id="rsk-keyakinan" min="1" max="10" value="5" oninput="document.getElementById('val-keyakinan').innerText = this.value" class="w-full accent-purple-700">
+                                <div class="text-center font-bold text-purple-900 text-lg" id="val-keyakinan">5</div>
+                                <p class="text-xs text-gray-400 text-center">[1-2 Sangat Takut] [3-4 Kurang Yakin] [5-6 Sederhana] [7-8 Yakin] [9-10 Sangat Yakin]</p>
+                            </div>
+
+                            <!-- BAHAGIAN C -->
+                            <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN C: MINAT & KECENDERUNGAN</div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">11. Mengapa anda BERMINAT menyertai RSK? (Boleh pilih lebih daripada 1) *</label>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Mahu bantu komuniti" class="rounded text-purple-600"> Mahu membantu komuniti menyelesaikan konflik secara damai</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Mendalami ilmu Sulh" class="rounded text-purple-600"> Berminat mendalami ilmu & kemahiran Sulh Kekeluargaan Islam</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Rujukan awal masyarakat" class="rounded text-purple-600"> Menjadi titik rujukan awal sebelum kes dibawa ke Mahkamah</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Tidak pasti" class="rounded text-purple-600"> Tidak pasti</label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">12. Kualiti PALING UTAMA bagi seorang RSK? *</label>
+                                <select id="rsk-kualiti" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                    <option value="">Sila Pilih</option>
+                                    <option value="Pandai bercakap dan bagi nasihat">Pandai bercakap dan bagi nasihat</option>
+                                    <option value="Neutral dan pendengar yang baik">Neutral dan pendengar yang baik</option>
+                                    <option value="Tegas dan cepat buat keputusan">Tegas dan cepat buat keputusan</option>
+                                    <option value="Mempunyai jawatan tinggi">Mempunyai jawatan tinggi</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">13. Pendekatan AWAL isu perbalahan jiran pasal parking? *</label>
+                                <select id="rsk-situasi" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                    <option value="">Sila Pilih</option>
+                                    <option value="Tegur kedua-duanya & minta beredar">Tegur kedua-duanya & minta beredar</option>
+                                    <option value="Mendengar luahan kedua-dua secara tenang & cari jalan tengah">Mendengar luahan kedua-dua secara tenang & cari jalan tengah</option>
+                                    <option value="Menyebelahi jiran yang lebih tua/dikenali">Menyebelahi jiran yang lebih tua/dikenali</option>
+                                    <option value="Menyuruh terus buat laporan polis">Menyuruh terus buat laporan polis</option>
+                                </select>
+                            </div>
+
+                            <!-- BAHAGIAN D -->
+                            <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN D: KOMITMEN MASA & KESEDIAAN</div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">14. Kesediaan ikuti Sesi Latihan Khas? *</label>
+                                    <select id="rsk-hadir" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                        <option value="">Sila Pilih</option>
+                                        <option value="Ya, bersedia sepenuhnya">Ya, bersedia sepenuhnya</option>
+                                        <option value="Boleh hadir, bergantung tarikh">Boleh hadir, bergantung tarikh</option>
+                                        <option value="Tidak pasti">Tidak pasti</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-1">15. Anggaran masa sukarela sebulan? *</label>
+                                    <select id="rsk-masa" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
+                                        <option value="">Sila Pilih</option>
+                                        <option value="1 - 3 jam sebulan">1 - 3 jam sebulan</option>
+                                        <option value="4 - 8 jam sebulan">4 - 8 jam sebulan</option>
+                                        <option value="Lebih 8 jam sebulan">Lebih 8 jam sebulan</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">16. Ringkasan mengapa anda wajar dipilih *</label>
+                                <textarea id="rsk-ringkasan" required rows="3" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white"></textarea>
+                            </div>
+
+                            <button type="submit" id="btn-submit" class="w-full bg-purple-700 text-white font-bold py-3 rounded-xl hover:bg-purple-800 transition cursor-pointer shadow-md">
+                                Hantar Permohonan
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- C. SEMAKAN STATUS PERMOHONAN (SUB-MENU RSK) -->
+                    <div id="kandungan-rakan-semak" class="hidden">
+                        <h2 class="text-2xl font-bold text-purple-950 mb-2">Semakan Status Permohonan</h2>
+                        <p class="text-sm text-gray-500 mb-6">Sila masukkan ID Permohonan, Nama Penuh, atau No. Telefon anda.</p>
+
+                        <div class="flex gap-2 mb-6">
+                            <input type="text" id="input-semak-id" placeholder="Contoh: RSK-123456 / Kaslim / 0123456789" class="flex-1 p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600">
+                            <button onclick="prosesSemakStatus()" class="bg-purple-700 text-white px-5 py-2.5 rounded-xl hover:bg-purple-800 font-bold transition cursor-pointer">Cari</button>
                         </div>
+
+                        <div id="hasil-semakan" class="hidden"></div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold mb-1">3. Pekerjaan / Bidang Tugas Semasa *</label>
-                            <input type="text" id="rsk-pekerjaan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold mb-1">4. No. Telefon (WhatsApp) *</label>
-                            <input type="text" id="rsk-notel" required placeholder="Contoh: 0123456789" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">5. Kawasan Kediaman Utama (Negeri, Daerah & Taman) *</label>
-                        <input type="text" id="rsk-kawasan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">6. Peranan dalam Komuniti Semasa *</label>
-                        <select id="rsk-peranan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                            <option value="">Sila Pilih</option>
-                            <option value="AJK KRT / Persatuan Penduduk">AJK KRT / Persatuan Penduduk</option>
-                            <option value="AJK Masjid / Surau">AJK Masjid / Surau</option>
-                            <option value="Sukarelawan NGO">Sukarelawan NGO</option>
-                            <option value="Pemimpin Belia / Wanita">Pemimpin Belia / Wanita</option>
-                            <option value="Tiada peranan rasmi">Tiada peranan rasmi (Penduduk setempat)</option>
-                        </select>
-                    </div>
-
-                    <!-- BAHAGIAN B -->
-                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN B: PENGLIBATAN & KEMAHIRAN AWAL</div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">7. Penglibatan aktiviti sukarelawan sebelum ini? *</label>
-                        <select id="rsk-penglibatan" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                            <option value="">Sila Pilih</option>
-                            <option value="Ya, aktif sehingga kini">Ya, aktif sehingga kini</option>
-                            <option value="Pernah, tetapi tidak aktif lagi">Pernah, tetapi tidak aktif lagi</option>
-                            <option value="Belum pernah, tetapi sangat teringin">Belum pernah, tetapi sangat teringin</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold mb-1">8. Pernah ikuti latihan Sulh/Mediasi? *</label>
-                            <select id="rsk-latihan" required onchange="toggleNamaKursus(this.value)" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                                <option value="">Sila Pilih</option>
-                                <option value="Pernah">Pernah</option>
-                                <option value="Tidak Pernah">Tidak Pernah</option>
-                            </select>
-                        </div>
-                        <div id="kotak-nama-kursus" class="hidden">
-                            <label class="block text-sm font-semibold mb-1">9. Nyatakan nama kursus</label>
-                            <input type="text" id="rsk-nama-kursus" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">10. Keyakinan berhadapan konflik (Skala 1 - 10) *</label>
-                        <input type="range" id="rsk-keyakinan" min="1" max="10" value="5" oninput="document.getElementById('val-keyakinan').innerText = this.value" class="w-full accent-purple-700">
-                        <div class="text-center font-bold text-purple-900 text-lg" id="val-keyakinan">5</div>
-                        <p class="text-xs text-gray-400 text-center">[1-2 Sangat Takut] [3-4 Kurang Yakin] [5-6 Sederhana] [7-8 Yakin] [9-10 Sangat Yakin]</p>
-                    </div>
-
-                    <!-- BAHAGIAN C -->
-                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN C: MINAT & KECENDERUNGAN</div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">11. Mengapa anda BERMINAT menyertai RSK? (Boleh pilih lebih daripada 1) *</label>
-                        <div class="space-y-2 text-sm">
-                            <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Mahu bantu komuniti" class="rounded text-purple-600"> Mahu membantu komuniti menyelesaikan konflik secara damai</label>
-                            <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Mendalami ilmu Sulh" class="rounded text-purple-600"> Berminat mendalami ilmu & kemahiran Sulh Kekeluargaan Islam</label>
-                            <label class="flex items-center gap-2"><input type="checkbox" name="sebab" value="Rujukan awal masyarakat" class="rounded text-purple-600"> Menjadi titik rujukan awal sebelum kes dibawa ke Mahkamah</label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">12. Kualiti PALING UTAMA bagi seorang RSK? *</label>
-                        <select id="rsk-kualiti" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                            <option value="">Sila Pilih</option>
-                            <option value="Pandai bercakap dan bagi nasihat">Pandai bercakap dan bagi nasihat</option>
-                            <option value="Neutral dan pendengar yang baik">Neutral dan pendengar yang baik</option>
-                            <option value="Tegas dan cepat buat keputusan">Tegas dan cepat buat keputusan</option>
-                            <option value="Mempunyai jawatan tinggi">Mempunyai jawatan tinggi</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">13. Pendekatan AWAL isu perbalahan jiran pasal parking? *</label>
-                        <select id="rsk-situasi" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                            <option value="">Sila Pilih</option>
-                            <option value="Tegur kedua-duanya & minta beredar">Tegur kedua-duanya & minta beredar</option>
-                            <option value="Mendengar luahan kedua-dua secara tenang & cari jalan tengah">Mendengar luahan kedua-dua secara tenang & cari jalan tengah</option>
-                            <option value="Menyebelahi jiran yang lebih tua/dikenali">Menyebelahi jiran yang lebih tua/dikenali</option>
-                            <option value="Menyuruh terus buat laporan polis">Menyuruh terus buat laporan polis</option>
-                        </select>
-                    </div>
-
-                    <!-- BAHAGIAN D -->
-                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 font-bold text-purple-900">BAHAGIAN D: KOMITMEN MASA & KESEDIAAN</div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold mb-1">14. Kesediaan ikuti Sesi Latihan Khas? *</label>
-                            <select id="rsk-hadir" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                                <option value="">Sila Pilih</option>
-                                <option value="Ya, bersedia sepenuhnya">Ya, bersedia sepenuhnya</option>
-                                <option value="Boleh hadir, bergantung tarikh">Boleh hadir, bergantung tarikh</option>
-                                <option value="Tidak pasti">Tidak pasti</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold mb-1">15. Anggaran masa sukarela sebulan? *</label>
-                            <select id="rsk-masa" required class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white">
-                                <option value="">Sila Pilih</option>
-                                <option value="1 - 3 jam sebulan">1 - 3 jam sebulan</option>
-                                <option value="4 - 8 jam sebulan">4 - 8 jam sebulan</option>
-                                <option value="Lebih 8 jam sebulan">Lebih 8 jam sebulan</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">16. Ringkasan mengapa anda wajar dipilih *</label>
-                        <textarea id="rsk-ringkasan" required rows="3" class="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 bg-white"></textarea>
-                    </div>
-
-                    <button type="submit" id="btn-submit" class="w-full bg-purple-700 text-white font-bold py-3 rounded-xl hover:bg-purple-800 transition cursor-pointer shadow-md">
-                        Hantar Permohonan
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- TAB 5: SEMAKAN STATUS (AWAM) -->
-        <div id="tab-semak" class="tab-content hidden">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-xl mx-auto">
-                <h2 class="text-2xl font-bold text-purple-950 mb-2">Semakan Status Permohonan</h2>
-                <p class="text-sm text-gray-500 mb-6">Masukkan ID Permohonan atau No. Telefon anda.</p>
-
-                <div class="flex gap-2 mb-6">
-                    <input type="text" id="input-semak-id" placeholder="Contoh: RSK-123456 atau No HP" class="flex-1 p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600">
-                    <button onclick="prosesSemakStatus()" class="bg-purple-700 text-white px-5 py-2.5 rounded-xl hover:bg-purple-800 font-bold transition cursor-pointer">Cari</button>
                 </div>
-
-                <div id="hasil-semakan" class="hidden"></div>
             </div>
         </div>
 
-        <!-- TAB 6: PORTAL ADMIN URUSETIA -->
+        <!-- TAB 4: PORTAL ADMIN URUSETIA -->
         <div id="tab-admin" class="tab-content hidden">
-            <!-- SKRIN LOGIN ADMIN -->
+            <!-- LOG IN ADMIN -->
             <div id="admin-login-box" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-md mx-auto">
-                <h2 class="text-xl font-bold text-purple-950 mb-4 text-center">Log Masuk Panel Admin</h2>
+                <h2 class="text-xl font-bold text-purple-950 mb-4 text-center">Log Masuk Panel Urusetia</h2>
                 <form onsubmit="prosesLoginAdmin(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">ID Pengguna</label>
@@ -303,7 +307,7 @@
                 </form>
             </div>
 
-            <!-- DASHBOARD ADMIN (LOCKED) -->
+            <!-- DASHBOARD ADMIN (SELEPAS LOGIN) -->
             <div id="admin-dashboard" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-6 border-b pb-4">
                     <div>
@@ -334,7 +338,7 @@
 
     </main>
 
-    <!-- MODAL POPUP -->
+    <!-- 5. POP-UP MODAL DOKUMEN / ANYFLIP -->
     <div id="modal-dokumen" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden shadow-2xl relative">
             <div class="p-4 border-b flex justify-between items-center bg-purple-50">
@@ -349,13 +353,49 @@
         </div>
     </div>
 
+    <!-- 6. POP-UP MODAL KERTAS KERJA PENILAIAN PERMOHONAN ADMIN -->
+    <div id="modalPenilaianAdmin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-purple-900 text-white px-6 py-4 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-bold">Kertas Kerja Penilaian Permohonan RSK</h3>
+                    <p class="text-xs text-purple-200" id="modalNoID">ID Permohonan: -</p>
+                </div>
+                <button onclick="tutupModalPenilaian()" class="text-white hover:text-gray-300 font-bold text-2xl leading-none cursor-pointer">&times;</button>
+            </div>
+
+            <!-- Content Body (Jawapan Pemohon) -->
+            <div class="p-6 overflow-y-auto space-y-6 text-sm text-gray-700" id="kandunganKertasKerja">
+                <!-- Data dinamik dimasukkan melalui JS -->
+            </div>
+
+            <!-- Action Buttons Footer -->
+            <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-between items-center">
+                <span class="text-xs text-gray-500 font-medium">Sila semak jawapan sebelum membuat keputusan status.</span>
+                <div class="flex gap-2" id="modalActionButtons"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. SKRIP JAVASCRIPT KESELURUHAN -->
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsMSYnBLojeygksdMsS0O1D84MEUvaUGkjz1lwkNDoK5DUhBCBRCtRBchBWGoEPvDLEw/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzi2KEfaseyPkoGXLOtA1Kfnt35U8q_GO146lb_e98rvJaj1Dy4gSFNeSnO1LYnICf2Q/exec";
 
         let dataInfoSulh = [];
         let dataRakanSulh = [];
         let mentahDataSemua = {};
         let kataKunciCarian = "";
+        let subIndexAktif = 0;
+
+        // HELPER: BERSIHKAN TARIKH (AMBIL TARIKH SAHAJA, BUANG WAKTU ISO)
+        function bersihkanTarikh(tarikhRaw) {
+            if (!tarikhRaw) return '-';
+            let str = tarikhRaw.toString();
+            if (str.includes('T')) return str.split('T')[0];
+            if (str.includes(' ')) return str.split(' ')[0];
+            return str;
+        }
 
         function tukarTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -369,7 +409,7 @@
             }
         }
 
-        async function muatTurunData() {
+        async function muatTurunData(elakResetPage = false) {
             try {
                 const respon = await fetch(GOOGLE_SCRIPT_URL);
                 if (!respon.ok) throw new Error("Gagal menyambung ke Google Sheets");
@@ -385,20 +425,20 @@
                         if(k === 'heading_image') document.getElementById('heading-image').src = v;
                         if(k === 'scroller_text') document.getElementById('scroller-text').innerText = v;
                         if(k === 'welcome_title') document.getElementById('welcome-title').innerText = v;
-                        if(k === 'welcome_desc') document.getElementById('welcome-desc').innerText = v;
+                        if(k === 'welcome_desc') document.getElementById('welcome-desc').innerHTML = v;
                     });
                 }
 
                 // 2. Info Sulh
                 if (mentahDataSemua.MenuInfoSulh) {
                     dataInfoSulh = mentahDataSemua.MenuInfoSulh.filter(item => (item.status || item.Status || "").toString().toLowerCase() === 'aktif');
-                    binaSidebar('info', dataInfoSulh);
+                    binaSidebar('info', dataInfoSulh, elakResetPage);
                 }
 
-                // 3. Rakan Sulh
+                // 3. Rakan Sulh Komuniti (Termasuk Pendaftaran & Semakan)
                 if (mentahDataSemua.MenuRakanSulh) {
                     dataRakanSulh = mentahDataSemua.MenuRakanSulh.filter(item => (item.status || item.Status || "").toString().toLowerCase() === 'aktif');
-                    binaSidebar('rakan', dataRakanSulh);
+                    binaSidebar('rakan', dataRakanSulh, elakResetPage);
                 }
 
                 document.getElementById('error-alert').classList.add('hidden');
@@ -409,32 +449,66 @@
             }
         }
 
-        function binaSidebar(jenis, data) {
+        function binaSidebar(jenis, data, elakResetPage = false) {
             const container = document.getElementById(`sidebar-${jenis}`);
             container.innerHTML = ""; 
 
-            data.forEach((item, index) => {
+            let senaraiData = [...data];
+
+            if (jenis === 'rakan') {
+                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Pendaftaran RSK')) {
+                    senaraiData.push({ tajuk: 'Pendaftaran RSK', jenisSub: 'mohon' });
+                }
+                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Semak Status')) {
+                    senaraiData.push({ tajuk: 'Semak Status', jenisSub: 'semak' });
+                }
+            }
+
+            senaraiData.forEach((item, index) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
+                btn.className = "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer mb-1";
                 btn.innerText = item.tajuk || item.Tajuk || "Tiada Tajuk";
-                btn.onclick = () => paparkanKandungan(jenis, index);
+                btn.onclick = () => paparkanKandungan(jenis, index, senaraiData);
                 container.appendChild(btn);
             });
 
-            if(data.length > 0) paparkanKandungan(jenis, 0);
+            // Hanya paparkan index pertama jika bukan dipanggil secara refresh senyap (elak reset page)
+            if(senaraiData.length > 0 && !elakResetPage) {
+                paparkanKandungan(jenis, subIndexAktif, senaraiData);
+            }
         }
 
-        function paparkanKandungan(jenis, index) {
-            const sasaranKandungan = document.getElementById(`kandungan-${jenis}`);
-            const item = jenis === 'info' ? dataInfoSulh[index] : dataRakanSulh[index];
+        function paparkanKandungan(jenis, index, senaraiDataRujukan) {
+            subIndexAktif = index;
+            const senaraiData = senaraiDataRujukan || (jenis === 'info' ? dataInfoSulh : dataRakanSulh);
+            const item = senaraiData[index] || senaraiData[0];
+            if (!item) return;
             
+            // HIGHLIGHT SIDEBAR WARNA PURPLE PEKAT
             const butangButang = document.getElementById(`sidebar-${jenis}`).querySelectorAll('button');
             butangButang.forEach((btn, idx) => {
                 btn.className = (idx === index) ? 
-                    "w-full text-left px-4 py-3 rounded-xl font-bold bg-purple-700 text-white cursor-pointer shadow-sm" : 
-                    "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer";
+                    "w-full text-left px-4 py-3 rounded-xl font-bold bg-purple-700 text-white cursor-pointer shadow-md mb-1" : 
+                    "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer mb-1";
             });
 
+            if (jenis === 'rakan') {
+                document.getElementById('kandungan-rakan-standard').classList.add('hidden');
+                document.getElementById('kandungan-rakan-mohon').classList.add('hidden');
+                document.getElementById('kandungan-rakan-semak').classList.add('hidden');
+
+                if (item.jenisSub === 'mohon') {
+                    document.getElementById('kandungan-rakan-mohon').classList.remove('hidden');
+                    return;
+                } else if (item.jenisSub === 'semak') {
+                    document.getElementById('kandungan-rakan-semak').classList.remove('hidden');
+                    return;
+                } else {
+                    document.getElementById('kandungan-rakan-standard').classList.remove('hidden');
+                }
+            }
+
+            const sasaranKandungan = jenis === 'info' ? document.getElementById('kandungan-info') : document.getElementById('kandungan-rakan-standard');
             const tajukAkhir = item.tajuk || item.Tajuk || "";
             let isiKandungan = item.kandungan || item.Kandungan || "";
             
@@ -452,7 +526,7 @@
                     </div>
                     <div id="grid-dokumen" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4"></div>
                 `;
-                paparkanGridKad(jenis, index);
+                paparkanGridKad(jenis, index, senaraiData);
                 return;
             }
 
@@ -467,8 +541,9 @@
             `;
         }
 
-        function paparkanGridKad(jenis, index) {
-            const item = jenis === 'info' ? dataInfoSulh[index] : dataRakanSulh[index];
+        function paparkanGridKad(jenis, index, senaraiDataRujukan) {
+            const senaraiData = senaraiDataRujukan || (jenis === 'info' ? dataInfoSulh : dataRakanSulh);
+            const item = senaraiData[index];
             const isiKandungan = item.kandungan || item.Kandungan || "";
             const gridContainer = document.getElementById("grid-dokumen");
             if (!gridContainer) return;
@@ -534,24 +609,27 @@
             document.body.style.overflow = "auto";
         }
 
-        // --- BANTUAN BORANG RSK ---
         function toggleNamaKursus(val) {
             const box = document.getElementById('kotak-nama-kursus');
             if(val === 'Pernah') box.classList.remove('hidden');
             else box.classList.add('hidden');
         }
 
+        // HANTAR BORANG RSK
         async function hantarBorangRSK(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
             btn.disabled = true;
             btn.innerText = "Sila tunggu...";
 
+            let rawNoTel = document.getElementById('rsk-notel').value.trim();
+
             const payload = {
+                action: 'daftarRSK',
                 nama: document.getElementById('rsk-nama').value,
                 umur: document.getElementById('rsk-umur').value,
                 pekerjaan: document.getElementById('rsk-pekerjaan').value,
-                notel: document.getElementById('rsk-notel').value,
+                notel: rawNoTel,
                 kawasan: document.getElementById('rsk-kawasan').value,
                 peranan: document.getElementById('rsk-peranan').value,
                 penglibatan: document.getElementById('rsk-penglibatan').value,
@@ -567,13 +645,16 @@
             };
 
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await fetch(GOOGLE_SCRIPT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
                 const hasil = await res.json();
-                if(hasil.status === 'success') {
-                    alert(`Permohonan Berjaya Hantar!\nID Permohonan Anda: ${hasil.idPermohonan}\nSila simpan ID ini untuk semakan status.`);
+                if(hasil.status === 'success' || hasil.success) {
+                    alert(`Permohonan Berjaya Hantar!\nID Permohonan Anda: ${hasil.idPermohonan || hasil.id}\nSila simpan ID ini untuk semakan status.`);
                     e.target.reset();
-                    tukarTab('semak');
-                    document.getElementById('input-semak-id').value = hasil.idPermohonan;
+                    document.getElementById('input-semak-id').value = hasil.idPermohonan || hasil.id;
                     prosesSemakStatus();
                 } else {
                     alert("Ralat: " + hasil.message);
@@ -586,43 +667,125 @@
             }
         }
 
-        // --- SEMAKAN STATUS AWAM ---
+        // CADANGAN 1 & 2 & 4: SEMAKAN STATUS (KEKAL PAGE, TARIKH BERSIH, KEMASKINI PROFIL LULUS)
         async function prosesSemakStatus() {
-            const input = document.getElementById('input-semak-id').value.trim();
+            const inputRaw = document.getElementById('input-semak-id').value.trim();
+            const inputClean = inputRaw.toLowerCase();
             const box = document.getElementById('hasil-semakan');
-            if(!input) return alert("Sila masukkan ID Permohonan atau No Tel!");
+            
+            if(!inputRaw) return alert("Sila masukkan ID Permohonan, Nama Penuh, atau No. Telefon!");
 
             box.classList.remove('hidden');
-            box.innerHTML = `<p class="text-gray-400 text-sm text-center">Mencari rekod...</p>`;
+            box.innerHTML = `<p class="text-purple-700 font-bold text-sm text-center py-4">Mencari rekod...</p>`;
 
-            await muatTurunData(); // Refresh data terkini
-            const dataRSK = mentahDataSemua.PermohonanRSK || [];
-            const padan = dataRSK.find(i => (i.ID_Permohonan || '').toString().toLowerCase() === input.toLowerCase() || (i.NoTel || '').toString() === input);
+            // Tarik data baharu tetapi elak reset paparan sub-tab
+            await muatTurunData(true);
+            const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
+            
+            const senaraiPadan = dataRSK.filter(i => {
+                const idStr = (i.ID_Permohonan || i.id || i.ID || '').toString().toLowerCase();
+                const namaStr = (i.Nama || i.nama || '').toString().toLowerCase();
+                const telStr = (i.NoTel || i.notel || i.telefon || i.Telefon || '').toString().replace(/[^0-9]/g, '');
+                const inputTelClean = inputRaw.replace(/[^0-9]/g, '');
 
-            if(padan) {
-                let badge = "bg-yellow-100 text-yellow-800";
-                if(padan.Status === "LULUS") badge = "bg-green-100 text-green-800";
-                if(padan.Status === "TOLAK") badge = "bg-red-100 text-red-800";
-                if(padan.Status === "KIV") badge = "bg-blue-100 text-blue-800";
+                return idStr.includes(inputClean) || 
+                       namaStr.includes(inputClean) || 
+                       (inputTelClean !== '' && telStr.includes(inputTelClean));
+            });
 
-                box.innerHTML = `
-                    <div class="p-5 border rounded-xl bg-purple-50/30">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-base text-gray-900">${padan.Nama}</h4>
-                                <p class="text-xs text-gray-500">ID: ${padan.ID_Permohonan} | Tarikh: ${padan.Tarikh}</p>
+            if(senaraiPadan.length > 0) {
+                box.innerHTML = senaraiPadan.map(padan => {
+                    const statusVal = (padan.Status || padan.status || 'PENDING').toUpperCase();
+                    const isLulus = statusVal === 'LULUS';
+
+                    let badge = "bg-yellow-100 text-yellow-800 border-yellow-200";
+                    if(isLulus) badge = "bg-green-100 text-green-800 border-green-200";
+                    if(statusVal === "TOLAK") badge = "bg-red-100 text-red-800 border-red-200";
+                    if(statusVal === "KIV") badge = "bg-blue-100 text-blue-800 border-blue-200";
+
+                    const idUnik = padan.ID_Permohonan || padan.id || padan.ID;
+                    const telPenuh = padan.NoTel || padan.notel || padan.telefon || padan.Telefon || '-';
+                    const alamatPenuh = padan.Kawasan || padan.kawasan || padan.alamat || padan.Alamat || '-';
+                    
+                    // CADANGAN 2: TARIKH BERSIH (BUANG MASA ISO)
+                    const tarikhBersih = bersihkanTarikh(padan.Tarikh || padan.tarikh);
+
+                    return `
+                        <div class="p-5 border rounded-2xl bg-white shadow-sm mb-4 space-y-3">
+                            <div class="flex justify-between items-start border-b pb-3">
+                                <div>
+                                    <h4 class="font-bold text-base text-gray-900">${padan.Nama || padan.nama}</h4>
+                                    <p class="text-xs text-gray-500">ID: <span class="font-bold text-purple-700">${idUnik}</span> | Tarikh: <span class="font-bold text-gray-700">${tarikhBersih}</span></p>
+                                </div>
+                                <span class="px-3 py-1 text-xs font-extrabold rounded-full border ${badge}">${statusVal}</span>
                             </div>
-                            <span class="px-3 py-1 text-xs font-extrabold rounded-full ${badge}">${padan.Status}</span>
+
+                            <div class="text-xs text-gray-600 space-y-1">
+                                <p><strong>📞 No. Telefon:</strong> ${telPenuh}</p>
+                                <p><strong>📍 Alamat/Kawasan:</strong> ${alamatPenuh}</p>
+                                ${padan.CatatanUrusetia ? `<p class="mt-2 text-xs bg-purple-50 p-2.5 rounded-lg border text-gray-700"><strong>Catatan Admin:</strong> ${padan.CatatanUrusetia}</p>` : ''}
+                            </div>
+
+                            <!-- CADANGAN 4: BORANG KEMASKINI PROFIL OLEH PEMOHON YANG LULUS -->
+                            ${isLulus ? `
+                                <div class="mt-4 pt-3 border-t border-purple-100 bg-purple-50/50 p-4 rounded-xl">
+                                    <h5 class="text-xs font-bold text-purple-900 mb-2">✏️ Kemaskini Maklumat Profil (Khusus Ahli Lulus):</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-gray-600 mb-1">No. Telefon Terkini:</label>
+                                            <input type="text" id="edit-tel-${idUnik}" value="${telPenuh}" class="w-full text-xs p-2.5 border rounded-xl bg-white outline-none focus:ring-2 focus:ring-purple-600" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Alamat Kediaman Terkini:</label>
+                                            <input type="text" id="edit-alamat-${idUnik}" value="${alamatPenuh}" class="w-full text-xs p-2.5 border rounded-xl bg-white outline-none focus:ring-2 focus:ring-purple-600" />
+                                        </div>
+                                    </div>
+                                    <button onclick="simpanProfilPemohonLulus('${idUnik}')" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer shadow">
+                                        Simpan Kemaskini Profil
+                                    </button>
+                                </div>
+                            ` : ''}
                         </div>
-                        ${padan.CatatanUrusetia ? `<p class="mt-3 text-xs bg-white p-3 rounded-lg border text-gray-600"><strong>Catatan Urusetia:</strong> ${padan.CatatanUrusetia}</p>` : ''}
-                    </div>
-                `;
+                    `;
+                }).join('');
             } else {
-                box.innerHTML = `<p class="text-red-500 text-sm text-center">Tiada permohonan dijumpai untuk "${input}".</p>`;
+                box.innerHTML = `<p class="text-red-500 font-semibold text-sm text-center py-4">Tiada permohonan dijumpai untuk "${inputRaw}".</p>`;
             }
         }
 
-        // --- PORTAL URUSETIA / ADMIN ---
+        // FUNGSI SIMPAN PROFIL PEMOHON LULUS
+        async function simpanProfilPemohonLulus(idPermohonan) {
+            const telBaru = document.getElementById(`edit-tel-${idPermohonan}`).value.trim();
+            const alamatBaru = document.getElementById(`edit-alamat-${idPermohonan}`).value.trim();
+
+            if (!telBaru || !alamatBaru) return alert("Sila pastikan No. Telefon dan Alamat diisi!");
+
+            const payload = {
+                action: "kemaskiniProfilPemohon",
+                idPermohonan: idPermohonan,
+                notel: telBaru,
+                kawasan: alamatBaru
+            };
+
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                const hasil = await res.json();
+                if(hasil.status === 'success' || hasil.success) {
+                    alert("Profil anda berjaya dikemaskini!");
+                    prosesSemakStatus();
+                } else {
+                    alert("Ralat: " + (hasil.message || "Gagal mengemaskini profil"));
+                }
+            } catch(e) {
+                alert("Gagal menghantar data profil baru.");
+            }
+        }
+
+        // PORTAL ADMIN LOG IN & DASHBOARD
         function prosesLoginAdmin(e) {
             e.preventDefault();
             const u = document.getElementById('admin-user').value.trim();
@@ -649,7 +812,7 @@
         function binaJadualAdmin() {
             const tbody = document.getElementById('jadual-admin-body');
             tbody.innerHTML = "";
-            const dataRSK = mentahDataSemua.PermohonanRSK || [];
+            const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
 
             if(dataRSK.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Tiada permohonan diterima lagi.</td></tr>`;
@@ -658,36 +821,144 @@
 
             dataRSK.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50";
+                tr.className = "hover:bg-purple-50/50 transition";
+                const idUnik = item.ID_Permohonan || item.id || item.ID;
+                const statusVal = item.Status || item.status || 'PENDING';
+                const tarikhBersih = bersihkanTarikh(item.Tarikh || item.tarikh);
+
                 tr.innerHTML = `
                     <td class="p-3">
-                        <div class="font-bold text-xs text-purple-900">${item.ID_Permohonan}</div>
-                        <div class="text-xs text-gray-400">${item.Tarikh}</div>
+                        <!-- CADANGAN 3: ID PERMOHONAN BOLEH DIKLIK UNTUK BUKA POP-UP KERTAS KERJA PENILAIAN -->
+                        <button onclick="bukaKertasKerjaAdmin('${idUnik}')" class="font-bold text-xs text-purple-700 hover:underline cursor-pointer text-left block">
+                            ${idUnik}
+                        </button>
+                        <div class="text-[10px] text-gray-400 font-bold">${tarikhBersih}</div>
                     </td>
                     <td class="p-3">
-                        <div class="font-bold text-gray-900">${item.Nama}</div>
-                        <div class="text-xs text-gray-500">${item.Umur} | ${item.Pekerjaan}</div>
+                        <div class="font-bold text-gray-900">${item.Nama || item.nama}</div>
+                        <div class="text-xs text-gray-500">${item.Umur || item.umur || ''} | ${item.Pekerjaan || item.pekerjaan || ''}</div>
                     </td>
                     <td class="p-3 text-xs">
-                        <div>📞 ${item.NoTel}</div>
-                        <div class="text-gray-500">📍 ${item.Kawasan}</div>
+                        <div>📞 ${item.NoTel || item.notel || item.telefon || item.Telefon}</div>
+                        <div class="text-gray-500">📍 ${item.Kawasan || item.kawasan || item.alamat || ''}</div>
                     </td>
                     <td class="p-3">
-                        <span class="px-2 py-1 text-xs font-bold rounded-md ${item.Status === 'LULUS' ? 'bg-green-100 text-green-800' : item.Status === 'TOLAK' ? 'bg-red-100 text-red-800' : item.Status === 'KIV' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}">${item.Status}</span>
+                        <span class="px-2 py-1 text-xs font-bold rounded-md ${statusVal === 'LULUS' ? 'bg-green-100 text-green-800' : statusVal === 'TOLAK' ? 'bg-red-100 text-red-800' : statusVal === 'KIV' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}">${statusVal}</span>
                     </td>
                     <td class="p-3 text-center space-x-1">
-                        <button onclick="kemaskiniStatus('${item.ID_Permohonan}', 'LULUS')" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 cursor-pointer">Lulus</button>
-                        <button onclick="kemaskiniStatus('${item.ID_Permohonan}', 'KIV')" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 cursor-pointer">KIV</button>
-                        <button onclick="kemaskiniStatus('${item.ID_Permohonan}', 'TOLAK')" class="bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700 cursor-pointer">Tolak</button>
+                        <button onclick="kemaskiniStatus('${idUnik}', 'LULUS')" class="bg-green-600 text-white text-xs px-2 py-1 rounded-md hover:bg-green-700 cursor-pointer shadow-sm">Lulus</button>
+                        <button onclick="kemaskiniStatus('${idUnik}', 'KIV')" class="bg-blue-600 text-white text-xs px-2 py-1 rounded-md hover:bg-blue-700 cursor-pointer shadow-sm">KIV</button>
+                        <button onclick="kemaskiniStatus('${idUnik}', 'TOLAK')" class="bg-red-600 text-white text-xs px-2 py-1 rounded-md hover:bg-red-700 cursor-pointer shadow-sm">Tolak</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
+        // BUKA POP-UP MODAL KERTAS KERJA PENILAIAN JAWAPAN PEMOHON
+        function bukaKertasKerjaAdmin(idPermohonan) {
+            const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
+
+            // Cari pemohon berdasarkan pelbagai kemungkinan nama key ID
+            const pemohon = dataRSK.find(p => {
+                const idSheet = (p.ID_Permohonan || p['ID Permohonan'] || p.id || p.ID || '').toString().trim();
+                return idSheet === idPermohonan.toString().trim();
+            });
+
+            if(!pemohon) {
+                alert('Data permohonan tidak dijumpai bagi ID: ' + idPermohonan);
+                return;
+            }
+
+            // Helper untuk ambil nilai dari maklumat pemohon dengan pelbagai key
+            const getVal = (keys) => {
+                for (let k of keys) {
+                    if (pemohon[k] !== undefined && pemohon[k] !== '') return pemohon[k];
+                }
+                return '-';
+            };
+
+            // Ambil data mengikut susunan kolum A hingga T Google Sheet
+            const nama = getVal(['Nama', 'nama', 'Nama Penuh']);
+            const umur = getVal(['Umur', 'umur']);
+            const pekerjaan = getVal(['Pekerjaan', 'pekerjaan']);
+            const notel = getVal(['NoTel', 'notel', 'No. Telefon', 'Telefon']);
+            const kawasan = getVal(['Kawasan', 'kawasan', 'Alamat', 'alamat']);
+            const peranan = getVal(['PerananKomuniti', 'peranan', 'Peranan dalam Komuniti']);
+            const penglibatan = getVal(['Penglibatan', 'penglibatan']);
+            const latihan = getVal(['LatihanSulh', 'latihan', 'Latihan Sulh']);
+            const namaKursus = getVal(['NamaKursus', 'namaKursus', 'Nama Kursus']);
+            const keyakinan = getVal(['Keyakinan', 'keyakinan']);
+            const sebabBerminat = getVal(['SebabBerminat', 'sebabBerminat', 'Sebab']);
+            const kualiti = getVal(['KualitiUtama', 'kualiti', 'Kualiti Utama']);
+            const situasi = getVal(['SituasiParking', 'situasi', 'Situasi']);
+            const komitmenHadir = getVal(['HadirLatihan', 'komitmenHadir', 'Komitmen Hadir']);
+            const komitmenMasa = getVal(['MasaSukarela', 'komitmenMasa', 'Komitmen Masa']);
+            const ringkasan = getVal(['RingkasanWajar', 'ringkasan', 'Ringkasan']);
+
+            document.getElementById('modalNoID').innerText = `ID Permohonan: ${idPermohonan}`;
+            
+            const htmlKertasKerja = `
+                <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><span class="font-bold text-gray-500 text-xs block">NAMA PEMOHON</span> <span class="font-bold text-purple-950 text-base">${nama}</span></div>
+                    <div><span class="font-bold text-gray-500 text-xs block">UMUR & PEKERJAAN</span> <span class="font-semibold text-purple-950">${umur} (${pekerjaan})</span></div>
+                    <div><span class="font-bold text-gray-500 text-xs block">NO. TELEFON</span> <span class="font-semibold text-purple-950">${notel}</span></div>
+                    <div><span class="font-bold text-gray-500 text-xs block">KAWASAN KEDIAMAN</span> <span class="font-semibold text-purple-950">${kawasan}</span></div>
+                    <div class="col-span-1 md:col-span-2"><span class="font-bold text-gray-500 text-xs block">PERANAN KOMUNITI</span> <span class="font-semibold text-purple-950">${peranan}</span></div>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="font-bold text-purple-900 border-b border-purple-200 pb-1 text-sm">Penilaian Jawapan Soalan Borang Pemohon:</h4>
+                    
+                    <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm space-y-2">
+                        <p class="text-xs text-purple-900 font-bold">1. Penglibatan Sukarelawan & Latihan Sulh:</p>
+                        <p class="text-xs text-gray-700">• <strong>Penglibatan:</strong> ${penglibatan}</p>
+                        <p class="text-xs text-gray-700">• <strong>Latihan Sulh:</strong> ${latihan} (Kursus: ${namaKursus})</p>
+                        <p class="text-xs text-gray-700">• <strong>Skala Keyakinan:</strong> <span class="font-bold text-purple-800 text-sm">${keyakinan}/10</span></p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm space-y-2">
+                        <p class="text-xs text-purple-900 font-bold">2. Kecenderungan & Kualiti Pemohon:</p>
+                        <p class="text-xs text-gray-700">• <strong>Sebab Berminat:</strong> ${sebabBerminat}</p>
+                        <p class="text-xs text-gray-700">• <strong>Kualiti Utama:</strong> ${kualiti}</p>
+                        <p class="text-xs text-gray-700">• <strong>Situasi Perbalahan Jiran:</strong> ${situasi}</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm space-y-1">
+                        <p class="text-xs text-purple-900 font-bold">3. Komitmen Masa & Ringkasan Kelayakan:</p>
+                        <p class="text-xs text-gray-700">• <strong>Hadir Latihan:</strong> ${komitmenHadir}</p>
+                        <p class="text-xs text-gray-700">• <strong>Masa Sukarela:</strong> ${komitmenMasa}</p>
+                        <div class="mt-2 text-xs text-gray-800 bg-purple-50 p-3 rounded-lg border border-purple-100">
+                            <strong>Wajar Dipilih Kerana:</strong>
+                            <p class="italic text-purple-950 mt-1">"${ringkasan}"</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('kandunganKertasKerja').innerHTML = htmlKertasKerja;
+
+            document.getElementById('modalActionButtons').innerHTML = `
+                <button onclick="kemaskiniStatus('${idPermohonan}', 'LULUS'); tutupModalPenilaian();" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition shadow">LULUS</button>
+                <button onclick="kemaskiniStatus('${idPermohonan}', 'KIV'); tutupModalPenilaian();" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition shadow">KIV</button>
+                <button onclick="kemaskiniStatus('${idPermohonan}', 'TOLAK'); tutupModalPenilaian();" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition shadow">TOLAK</button>
+            `;
+
+            // Buka Modal Pop-up
+            const modalEl = document.getElementById('modalPenilaianAdmin');
+            modalEl.classList.remove('hidden');
+            modalEl.classList.add('flex');
+        }
+
+        function tutupModalPenilaian() {
+            const modalEl = document.getElementById('modalPenilaianAdmin');
+            modalEl.classList.add('hidden');
+            modalEl.classList.remove('flex');
+        }
+
         async function kemaskiniStatus(idPermohonan, statusBaru) {
-            const nota = prompt(`Catatan Urusetia untuk [${idPermohonan}] (Opsional):`);
-            if (nota === null) return; // Batal jika tekan cancel
+            const nota = prompt(`Catatan Admin untuk [${idPermohonan}] (Opsional):`);
+            if (nota === null) return;
 
             const payload = {
                 action: "updateStatus",
@@ -697,17 +968,21 @@
             };
 
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await fetch(GOOGLE_SCRIPT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
                 const hasil = await res.json();
-                alert(hasil.message);
-                await muatTurunData();
+                alert(hasil.message || "Status dikemaskini!");
+                await muatTurunData(true);
                 binaJadualAdmin();
             } catch (err) {
                 alert("Gagal mengemaskini status.");
             }
         }
 
-        window.onload = muatTurunData;
+        window.onload = () => muatTurunData();
     </script>
 </body>
 </html>
