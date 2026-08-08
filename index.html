@@ -1067,12 +1067,11 @@
         }
 
        function semakDirectLink() {
-            const hash = window.location.hash.toLowerCase();
+           const hash = window.location.hash.toLowerCase();
 
-            // Jika URL ada '#pendaftaran-rsk' atau '#pendaftaran'
             if (hash === '#pendaftaran-rsk' || hash === '#pendaftaran') {
                 
-                // 1. Cari & klik butang MENU Navigasi sahaja (bukan tajuk website)
+                // 1. Klik Menu Utama "Rakan Sulh Komuniti"
                 const allNavLinks = Array.from(document.querySelectorAll('nav a, nav button, header button, header a'));
                 const menuRakanSulh = allNavLinks.find(el => {
                     const txt = el.textContent.trim().toLowerCase();
@@ -1080,24 +1079,27 @@
                 });
 
                 if (menuRakanSulh) {
-                    menuRakanSulh.click(); // Paksa klik menu utama
+                    menuRakanSulh.click();
                 }
 
-                // 2. Tunggu sekejap, klik sub-tab Pendaftaran & Scroll terus ke borang
+                // 2. Beri masa 500ms untuk sidebar render, kemudian paksa klik BUTANG NOMBOR 2 ("Pendaftaran RSK")
                 setTimeout(() => {
-                    const allSubTabs = Array.from(document.querySelectorAll('button, a'));
-                    const subTabPendaftaran = allSubTabs.find(el => {
+                    // Cari semua butang/link dalam sidebar kiri tu
+                    const sidebarLinks = Array.from(document.querySelectorAll('button, a, div'));
+                    
+                    // Cari butang yang TEPAT ada teks "Pendaftaran RSK"
+                    const btnPendaftaran = sidebarLinks.find(el => {
                         const txt = el.textContent.trim().toLowerCase();
-                        return txt.includes('pendaftaran rsk') || txt.includes('pendaftaran');
+                        return txt.includes('pendaftaran rsk') || txt === 'pendaftaran rsk';
                     });
 
-                    if (subTabPendaftaran) {
-                        subTabPendaftaran.click(); // Paksa klik sub-tab pendaftaran
+                    if (btnPendaftaran) {
+                        btnPendaftaran.click(); // Klik butang nombor 2!
                         
-                        // Auto-scroll ke kawasan borang
-                        subTabPendaftaran.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Scroll terus ke borang
+                        btnPendaftaran.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                }, 400);
+                }, 500); // Naikkan delay ke 500ms supaya sidebar sempat load penuh
             }
         }
 
