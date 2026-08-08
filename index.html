@@ -393,9 +393,6 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzi2KEfaseyPkoGXLOtA1Kfnt35U8q_GO146lb_e98rvJaj1Dy4gSFNeSnO1LYnICf2Q/exec";
 
-        // =========================================================================
-        // HELPER: SMART IMAGE FORMATTER (SUPPORT DRIVE, CANVA & DIRECT URL)
-        // =========================================================================
         function formatMediaURL(inputUrl) {
             if (!inputUrl) return '';
             let url = inputUrl.trim();
@@ -423,6 +420,50 @@
 
             // 4. Link Direct Image biasa
             return url;
+        }
+
+        
+        let bannerInterval = null;
+
+        function setupBannerSlider(rawImageUrls) {
+            if (!rawImageUrls) return;
+
+            // Pecahkan string berdasarkan koma ATAU baris baru
+            const urlArray = rawImageUrls
+                .split(/[\n,]+/)
+                .map(url => url.trim())
+                .filter(url => url.length > 0);
+
+            if (urlArray.length === 0) return;
+
+            const imgElement = document.getElementById('heading-image');
+            if (!imgElement) return;
+
+            let currentIndex = 0;
+
+            function showImage(index) {
+                imgElement.style.opacity = '0.3'; // Efek kelip sikit masa tukar gambar
+                
+                setTimeout(() => {
+                    // DI SINI DIA GUNA formatMediaURL KAU TADI!
+                    imgElement.src = formatMediaURL(urlArray[index]);
+                    imgElement.style.opacity = '1';
+                }, 300);
+            }
+
+            // Papar gambar 1 dulu
+            showImage(0);
+
+            // Kalau ada lebih dari 1 gambar, jalan slider automatik
+            if (urlArray.length > 1) {
+                if (bannerInterval) clearInterval(bannerInterval);
+
+                // Tukar gambar setiap 5 saat (5000ms)
+                bannerInterval = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % urlArray.length;
+                    showImage(currentIndex);
+                }, 5000);
+            }
         }
 
         let dataInfoSulh = [];
@@ -1025,7 +1066,37 @@
             }
         }
 
-        window.onload = () => muatTurunData();
+        function semakDirectLink() {
+            const hash = window.location.hash.toLowerCase();
+
+            // Jika URL ada '#pendaftaran-rsk' atau '#pendaftaran'
+            if (hash === '#pendaftaran-rsk' || hash === '#pendaftaran') {
+                
+                // 1. Buka Tab Utama 'Rakan Sulh Komuniti'
+                if (typeof tukarTab === 'function') {
+                    tukarTab('rakansulh'); // Buka tab Rakan Sulh Komuniti
+                }
+
+                // 2. Auto-click sub-tab Pendaftaran RSK
+                setTimeout(() => {
+                    // Cari butang yang ada teks/onclick Pendaftaran
+                    const btnPendaftaran = document.querySelector('[onclick*="pendaftaran"], [onclick*="Pendaftaran"]');
+                    if (btnPendaftaran) {
+                        btnPendaftaran.click();
+                    }
+                }, 150);
+            }
+        }
+
+        // Jalankan muatTurunData() dan semakDirectLink() bila window siap load
+        window.onload = () => {
+            muatTurunData();
+            semakDirectLink();
+        };
+
+        // Listen jika user tukar hash link
+        window.addEventListener('hashchange', semakDirectLink);
+
     </script>
 </body>
 </html>
