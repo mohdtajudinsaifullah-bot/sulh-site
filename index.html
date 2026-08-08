@@ -1066,37 +1066,49 @@
             }
         }
 
-        function semakDirectLink() {
+       function semakDirectLink() {
             const hash = window.location.hash.toLowerCase();
 
             // Jika URL ada '#pendaftaran-rsk' atau '#pendaftaran'
             if (hash === '#pendaftaran-rsk' || hash === '#pendaftaran') {
                 
-                // 1. Buka Tab Utama 'Rakan Sulh Komuniti'
-                if (typeof tukarTab === 'function') {
-                    tukarTab('rakansulh'); // Buka tab Rakan Sulh Komuniti
+                // 1. Cari & klik butang MENU Navigasi sahaja (bukan tajuk website)
+                const allNavLinks = Array.from(document.querySelectorAll('nav a, nav button, header button, header a'));
+                const menuRakanSulh = allNavLinks.find(el => {
+                    const txt = el.textContent.trim().toLowerCase();
+                    return txt === 'rakan sulh komuniti' || txt.includes('rakan sulh');
+                });
+
+                if (menuRakanSulh) {
+                    menuRakanSulh.click(); // Paksa klik menu utama
                 }
 
-                // 2. Auto-click sub-tab Pendaftaran RSK
+                // 2. Tunggu sekejap, klik sub-tab Pendaftaran & Scroll terus ke borang
                 setTimeout(() => {
-                    // Cari butang yang ada teks/onclick Pendaftaran
-                    const btnPendaftaran = document.querySelector('[onclick*="pendaftaran"], [onclick*="Pendaftaran"]');
-                    if (btnPendaftaran) {
-                        btnPendaftaran.click();
+                    const allSubTabs = Array.from(document.querySelectorAll('button, a'));
+                    const subTabPendaftaran = allSubTabs.find(el => {
+                        const txt = el.textContent.trim().toLowerCase();
+                        return txt.includes('pendaftaran rsk') || txt.includes('pendaftaran');
+                    });
+
+                    if (subTabPendaftaran) {
+                        subTabPendaftaran.click(); // Paksa klik sub-tab pendaftaran
+                        
+                        // Auto-scroll ke kawasan borang
+                        subTabPendaftaran.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                }, 150);
+                }, 400);
             }
         }
 
-        // Jalankan muatTurunData() dan semakDirectLink() bila window siap load
+        // Panggil masa MULA-MULA halaman siap muat turun
         window.onload = () => {
-            muatTurunData();
-            semakDirectLink();
+            if (typeof muatTurunData === 'function') muatTurunData();
+            setTimeout(semakDirectLink, 300); // Beri delay sikit supaya DOM bersedia
         };
 
-        // Listen jika user tukar hash link
+        // Listen jika user tukar hash link secara manual
         window.addEventListener('hashchange', semakDirectLink);
-
     </script>
 </body>
 </html>
