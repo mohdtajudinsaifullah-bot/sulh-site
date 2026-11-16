@@ -993,37 +993,75 @@
         function binaPanelChatRSK(idRSK, namaRSK, statusOnlineSemasa) {
             const isOnline = statusOnlineSemasa.toUpperCase() === 'ONLINE';
             rskAktifLogin = { id: idRSK, nama: namaRSK };
+
             setTimeout(() => {
                 const senaraiSesiBox = document.getElementById('senarai-sesi-masuk-rsk');
                 if (!senaraiSesiBox) return;
+
                 dbChat.ref('sesi_chat').orderByChild('idRSK').equalTo(idRSK).on('value', snapshot => {
                     const semuaSesi = snapshot.val();
-                    if (!semuaSesi) return senaraiSesiBox.innerHTML = `<p class="text-xs text-gray-400 italic">Tiada sesi chat aktif buat masa ini.</p>`;
+                    if (!semuaSesi) {
+                        senaraiSesiBox.innerHTML = `<p class="text-xs text-gray-400 italic">Tiada sesi chat aktif buat masa ini.</p>`;
+                        return;
+                    }
+
                     const kunciSesi = Object.keys(semuaSesi).reverse();
-                    senaraiSesiBox.innerHTML = kunciSesi.map(k => {
+                    let htmlSenarai = '';
+
+                    kunciSesi.forEach(k => {
                         const s = semuaSesi[k];
                         const aktif = s.status === 'AKTIF';
-                        return `
+
+                        htmlSenarai += `
                             <div class="flex justify-between items-center p-3 bg-white rounded-xl border ${aktif ? 'border-green-300' : 'border-gray-200'}">
-                                <div><p class="text-xs font-bold text-gray-900">Pengunjung: ${s.namaAwam}</p><span class="text-[10px] font-bold px-2 py-0.5 rounded ${aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${aktif ? '● Sesi Aktif' : 'Sesi Tamat'}</span></div>
-                                <button onclick="bukaChatSebagaiRSK('${k}', '${s.namaAwam.replace(/'/g, "\\'")}')" class="bg-purple-700 hover:bg-purple-800 text-white text-xs px-3 py-1.5 rounded-lg font-bold cursor-pointer">Buka Chat</button>
+                                <div>
+                                    <p class="text-xs font-bold text-gray-900">Pengunjung: ${s.namaAwam}</p>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">
+                                        ${aktif ? '● Sesi Aktif' : 'Sesi Tamat'}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <button onclick="bukaChatSebagaiRSK('${k}', '${s.namaAwam.replace(/'/g, "\\'")}')" class="bg-purple-700 hover:bg-purple-800 text-white text-xs px-3 py-1.5 rounded-lg font-bold cursor-pointer">
+                                        Buka Chat
+                                    </button>
+                                    ${!aktif ? `
+                                        <button onclick="padamSesiChat('${k}')" title="Padam rekod chat ini" class="bg-red-100 hover:bg-red-200 text-red-700 text-xs px-2.5 py-1.5 rounded-lg font-bold cursor-pointer">
+                                            Padam
+                                        </button>
+                                    ` : ''}
+                                </div>
                             </div>
                         `;
-                    }).join('');
+                    });
+
+                    senaraiSesiBox.innerHTML = htmlSenarai || `<p class="text-xs text-gray-400 italic">Tiada sesi chat aktif buat masa ini.</p>`;
                 });
             }, 300);
+
             return `
                 <div class="mt-4 p-5 rounded-xl border border-purple-200 bg-purple-50/60 space-y-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-purple-200 pb-3">
-                        <div><h4 class="font-bold text-purple-950 text-sm">🟢 Kawalan Khidmat Nasihat</h4><p class="text-xs text-gray-600">Tukar status kepada ONLINE hanya apabila bersedia menerima chat.</p></div>
+                        <div>
+                            <h4 class="font-bold text-purple-950 text-sm">🟢 Kawalan Khidmat Nasihat</h4>
+                            <p class="text-xs text-gray-600">Tukar status kepada ONLINE hanya apabila bersedia menerima chat.</p>
+                        </div>
                         <div class="flex gap-2">
                             <button onclick="setStatusOnlineRSK('${idRSK}', 'ONLINE')" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition ${isOnline ? 'bg-green-600 text-white shadow' : 'bg-white text-gray-600 border'}">Set ONLINE</button>
                             <button onclick="setStatusOnlineRSK('${idRSK}', 'OFFLINE')" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition ${!isOnline ? 'bg-gray-700 text-white shadow' : 'bg-white text-gray-600 border'}">Set OFFLINE</button>
                         </div>
                     </div>
-                    <div><h5 class="text-xs font-bold text-purple-900 mb-2">📩 Senarai Sesi Chat Masuk:</h5><div id="senarai-sesi-masuk-rsk" class="space-y-2"><p class="text-xs text-gray-400">Menyemak sesi chat...</p></div></div>
+                    <div>
+                        <h5 class="text-xs font-bold text-purple-900 mb-2">📩 Senarai Sesi Chat Masuk:</h5>
+                        <div id="senarai-sesi-masuk-rsk" class="space-y-2"><p class="text-xs text-gray-400">Menyemak sesi chat...</p></div>
+                    </div>
                 </div>
             `;
+        }
+
+// Fungsi padam sesi chat secara manual oleh RSK
+        function padamSesiChat(idSesi) {
+            if (!confirm("Padam rekod perbualan ini secara kekal?")) return;
+            dbChat.ref(`sesi_chat/${idSesi}`).remove();
         }
 
         function bukaChatSebagaiRSK(idSesi, namaAwam) {
