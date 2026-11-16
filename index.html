@@ -6,6 +6,11 @@
     <title>Portal Korporat Sulh Komuniti</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- Firebase App & Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
     <style>
         body::before {
             content: "";
@@ -53,10 +58,14 @@
                 <div class="flex-shrink-0 flex items-center">
                     <span class="text-2xl font-bold text-purple-900 tracking-wider cursor-pointer" onclick="tukarTab('home')">PORTAL RAKAN SULH KOMUNITI</span>
                 </div>
-                <div class="hidden md:flex space-x-6 font-semibold text-gray-600 items-center">
+                <div class="hidden md:flex space-x-4 lg:space-x-6 font-semibold text-gray-600 items-center text-sm lg:text-base">
                     <button onclick="tukarTab('home')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Home</button>
                     <button onclick="tukarTab('info')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Info Sulh</button>
                     <button onclick="tukarTab('rakan')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Rakan Sulh Komuniti</button>
+                    <!-- Butang Nasihat Online -->
+                    <button onclick="tukarTab('nasihat')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Khidmat Nasihat
+                    </button>
                     <button onclick="tukarTab('admin')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition cursor-pointer">Admin</button>
                 </div>
             </div>
@@ -166,7 +175,6 @@
                                 </div>
                             </div>
 
-                            <!-- Tetapan Privasi Telefon -->
                             <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 flex items-center gap-3">
                                 <input type="checkbox" id="rsk-papartel" class="h-4 w-4 text-purple-600 rounded">
                                 <label for="rsk-papartel" class="text-xs text-purple-950 font-medium cursor-pointer">
@@ -347,6 +355,25 @@
                 </div>
             </div>
         </div>
+        
+        <!-- TAB 5: KHIDMAT NASIHAT DALAM TALIAN -->
+        <div id="tab-nasihat" class="tab-content hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-purple-950">💬 Khidmat Nasihat Sulh Dalam Talian (Percuma)</h2>
+                        <p class="text-sm text-gray-500 mt-1">Pilih Rakan Sulh Komuniti yang sedang <strong>Online</strong> untuk memulakan sesi perbualan sulit tanpa mendedahkan nombor telefon.</p>
+                    </div>
+                    <button onclick="muatSenaraiRSKOnline()" class="text-xs bg-purple-100 text-purple-800 px-4 py-2 rounded-xl font-bold hover:bg-purple-200 transition cursor-pointer">
+                        🔄 Segar Semula Senarai
+                    </button>
+                </div>
+        
+                <div id="senarai-rsk-online" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Kad RSK Online dijana secara dinamik -->
+                </div>
+            </div>
+        </div>
 
         <!-- TAB 4: PORTAL ADMIN URUSETIA -->
         <div id="tab-admin" class="tab-content hidden">
@@ -460,32 +487,90 @@
         </div>
     </div>
 
+    <!-- POP-UP MODAL BILIK CHAT REAL-TIME -->
+    <div id="modalChatRSK" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col h-[80vh] overflow-hidden border border-purple-200">
+            <!-- Header Bilik Chat -->
+            <div class="bg-purple-900 text-white px-5 py-4 flex justify-between items-center">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                        <h3 class="text-base font-bold" id="chat-tajuk-rsk">Sesi Khidmat Nasihat</h3>
+                    </div>
+                    <p class="text-[11px] text-purple-200" id="chat-subtajuk">Sesi sulit & sementara</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-tamat-sesi" onclick="tamatkanSesiChat()" class="hidden bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold cursor-pointer">
+                        Tamat Sesi
+                    </button>
+                    <button onclick="tutupModalChat()" class="text-white hover:text-gray-300 font-bold text-2xl leading-none cursor-pointer">&times;</button>
+                </div>
+            </div>
+    
+            <!-- Paparan Mesej -->
+            <div id="kotak-mesej-chat" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm">
+                <!-- Buih mesej masuk di sini -->
+            </div>
+    
+            <!-- Amaran Jika Sesi Tamat -->
+            <div id="notis-sesi-tamat" class="hidden bg-red-50 text-red-700 text-xs text-center p-3 font-semibold border-t border-red-200">
+                Sesi perbualan ini telah ditamatkan. Sila buka sesi baharu jika memerlukan bantuan lanjut.
+            </div>
+    
+            <!-- Input Mesej -->
+            <form id="form-hantar-mesej" onsubmit="hantarMesejChat(event)" class="p-3 bg-white border-t border-gray-200 flex gap-2">
+                <input type="text" id="input-mesej-chat" required placeholder="Taip mesej anda di sini..." class="flex-1 p-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-purple-600 outline-none">
+                <button type="submit" class="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition cursor-pointer">
+                    Hantar
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- SKRIP JAVASCRIPT KESELURUHAN -->
     <script>
+        // ==========================================
+        // KONFIGURASI FIREBASE REALTIME DATABASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "API_KEY_ASAL_DARI_FIREBASE_KAU",
+            authDomain: "admin-jakess.firebaseapp.com",
+            databaseURL: "https://admin-jakess-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "admin-jakess",
+            storageBucket: "admin-jakess.firebasestorage.app",
+            messagingSenderId: "1096148732784",
+            appId: "1:1096148732784:web:1868b93eedb3aa139b5db5"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const dbChat = firebase.database();
+        
+        let sesiChatSemasa = null;
+        let perananChatSemasa = 'AWAM'; 
+        let namaPenghantarChat = 'Orang Awam';
+        let rskAktifLogin = null;
+
+        // ==========================================
+        // URL GOOGLE APPS SCRIPT
+        // ==========================================
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzi2KEfaseyPkoGXLOtA1Kfnt35U8q_GO146lb_e98rvJaj1Dy4gSFNeSnO1LYnICf2Q/exec";
 
         function formatMediaURL(inputUrl) {
             if (!inputUrl) return '';
             let url = inputUrl.trim();
-
             if (url.includes('<iframe') || url.includes('<div')) {
                 const srcMatch = url.match(/src="([^"]+)"/);
                 if (srcMatch && srcMatch[1]) url = srcMatch[1];
                 else return url;
             }
-
             if (url.includes('drive.google.com')) {
                 const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-                if (match && match[1]) {
-                    return `https://lh3.googleusercontent.com/d/${match[1]}=w2000`;
-                }
+                if (match && match[1]) return `https://lh3.googleusercontent.com/d/${match[1]}=w2000`;
             }
-
             if (url.includes('canva.com/design/')) {
                 const cleanUrl = url.split('?')[0].replace(/\/view$/, '');
                 return `${cleanUrl}/view?embed`;
             }
-
             return url;
         }
 
@@ -493,19 +578,11 @@
 
         function setupBannerSlider(rawImageUrls) {
             if (!rawImageUrls) return;
-
-            const urlArray = rawImageUrls
-                .split(/[\n,]+/)
-                .map(url => url.trim())
-                .filter(url => url.length > 0);
-
+            const urlArray = rawImageUrls.split(/[\n,]+/).map(url => url.trim()).filter(url => url.length > 0);
             if (urlArray.length === 0) return;
-
             const imgElement = document.getElementById('heading-image');
             if (!imgElement) return;
-
             let currentIndex = 0;
-
             function showImage(index) {
                 imgElement.style.opacity = '0.3';
                 setTimeout(() => {
@@ -513,9 +590,7 @@
                     imgElement.style.opacity = '1';
                 }, 300);
             }
-
             showImage(0);
-
             if (urlArray.length > 1) {
                 if (bannerInterval) clearInterval(bannerInterval);
                 bannerInterval = setInterval(() => {
@@ -554,20 +629,17 @@
         function tukarTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            
             const hero = document.getElementById('hero-section');
-            if(tabName === 'home') {
-                hero.classList.remove('hidden');
-            } else {
-                hero.classList.add('hidden');
-            }
+            if(tabName === 'home') hero.classList.remove('hidden');
+            else hero.classList.add('hidden');
+            
+            if (tabName === 'nasihat') muatSenaraiRSKOnline();
         }
 
         async function muatTurunData(elakResetPage = false) {
             try {
                 const respon = await fetch(GOOGLE_SCRIPT_URL);
                 if (!respon.ok) throw new Error("Gagal menyambung ke Google Sheets");
-                
                 mentahDataSemua = await respon.json();
 
                 if (mentahDataSemua.HalamanUtama) {
@@ -580,19 +652,15 @@
                         if(k === 'welcome_desc') document.getElementById('welcome-desc').innerHTML = v;
                     });
                 }
-
                 if (mentahDataSemua.MenuInfoSulh) {
                     dataInfoSulh = mentahDataSemua.MenuInfoSulh.filter(item => (item.status || item.Status || "").toString().toLowerCase() === 'aktif');
                     binaSidebar('info', dataInfoSulh, elakResetPage);
                 }
-
                 if (mentahDataSemua.MenuRakanSulh) {
                     dataRakanSulh = mentahDataSemua.MenuRakanSulh.filter(item => (item.status || item.Status || "").toString().toLowerCase() === 'aktif');
                     binaSidebar('rakan', dataRakanSulh, elakResetPage);
                 }
-
                 document.getElementById('error-alert').classList.add('hidden');
-
             } catch (error) {
                 console.error("Detail Error:", error);
                 document.getElementById('error-alert').classList.remove('hidden');
@@ -602,22 +670,13 @@
         function binaSidebar(jenis, data, elakResetPage = false) {
             const container = document.getElementById(`sidebar-${jenis}`);
             container.innerHTML = ""; 
-
             let senaraiData = [...data];
 
             if (jenis === 'rakan') {
-                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Rakan Sulh Komuniti')) {
-                    senaraiData.unshift({ tajuk: 'Rakan Sulh Komuniti', jenisSub: 'standard' });
-                }
-                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Pendaftaran RSK')) {
-                    senaraiData.push({ tajuk: 'Pendaftaran RSK', jenisSub: 'mohon' });
-                }
-                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Semak Status')) {
-                    senaraiData.push({ tajuk: 'Semak Status', jenisSub: 'semak' });
-                }
-                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Carian Rakan Sulh')) {
-                    senaraiData.push({ tajuk: 'Carian Rakan Sulh', jenisSub: 'carian' });
-                }
+                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Rakan Sulh Komuniti')) senaraiData.unshift({ tajuk: 'Rakan Sulh Komuniti', jenisSub: 'standard' });
+                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Pendaftaran RSK')) senaraiData.push({ tajuk: 'Pendaftaran RSK', jenisSub: 'mohon' });
+                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Semak Status')) senaraiData.push({ tajuk: 'Semak Status', jenisSub: 'semak' });
+                if (!senaraiData.some(i => (i.tajuk || i.Tajuk) === 'Carian Rakan Sulh')) senaraiData.push({ tajuk: 'Carian Rakan Sulh', jenisSub: 'carian' });
             }
 
             senaraiData.forEach((item, index) => {
@@ -628,9 +687,7 @@
                 container.appendChild(btn);
             });
 
-            if(senaraiData.length > 0 && !elakResetPage) {
-                paparkanKandungan(jenis, subIndexAktif, senaraiData);
-            }
+            if(senaraiData.length > 0 && !elakResetPage) paparkanKandungan(jenis, subIndexAktif, senaraiData);
         }
 
         function paparkanKandungan(jenis, index, senaraiDataRujukan) {
@@ -641,9 +698,7 @@
             
             const butangButang = document.getElementById(`sidebar-${jenis}`).querySelectorAll('button');
             butangButang.forEach((btn, idx) => {
-                btn.className = (idx === index) ? 
-                    "w-full text-left px-4 py-3 rounded-xl font-bold bg-purple-700 text-white cursor-pointer shadow-md mb-1" : 
-                    "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer mb-1";
+                btn.className = (idx === index) ? "w-full text-left px-4 py-3 rounded-xl font-bold bg-purple-700 text-white cursor-pointer shadow-md mb-1" : "w-full text-left px-4 py-3 rounded-xl font-medium transition text-gray-750 bg-white/40 hover:bg-purple-50 hover:text-purple-700 cursor-pointer mb-1";
             });
 
             if (jenis === 'rakan') {
@@ -652,19 +707,12 @@
                 document.getElementById('kandungan-rakan-semak').classList.add('hidden');
                 document.getElementById('kandungan-rakan-carian').classList.add('hidden');
 
-                if (item.jenisSub === 'mohon') {
-                    document.getElementById('kandungan-rakan-mohon').classList.remove('hidden');
-                    return;
-                } else if (item.jenisSub === 'semak') {
-                    document.getElementById('kandungan-rakan-semak').classList.remove('hidden');
-                    return;
-                } else if (item.jenisSub === 'carian') {
+                if (item.jenisSub === 'mohon') return document.getElementById('kandungan-rakan-mohon').classList.remove('hidden');
+                else if (item.jenisSub === 'semak') return document.getElementById('kandungan-rakan-semak').classList.remove('hidden');
+                else if (item.jenisSub === 'carian') {
                     document.getElementById('kandungan-rakan-carian').classList.remove('hidden');
-                    laksanaCarianAwam();
-                    return;
-                } else {
-                    document.getElementById('kandungan-rakan-standard').classList.remove('hidden');
-                }
+                    return laksanaCarianAwam();
+                } else document.getElementById('kandungan-rakan-standard').classList.remove('hidden');
             }
 
             const sasaranKandungan = jenis === 'info' ? document.getElementById('kandungan-info') : document.getElementById('kandungan-rakan-standard');
@@ -676,8 +724,7 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-gray-100 mb-6 gap-4">
                         <h3 class="text-3xl font-extrabold text-purple-950 tracking-tight">${tajukAkhir}</h3>
                         <div class="relative w-full md:w-72">
-                            <input type="text" id="input-carian-dokumen" oninput="tapisDokumen('${jenis}', ${index})" placeholder="Cari kertas kerja..." 
-                                class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm bg-white shadow-sm" value="${kataKunciCarian}">
+                            <input type="text" id="input-carian-dokumen" oninput="tapisDokumen('${jenis}', ${index})" placeholder="Cari kertas kerja..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm bg-white shadow-sm" value="${kataKunciCarian}">
                             <div class="absolute left-3 top-2.5 text-gray-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
@@ -685,8 +732,7 @@
                     </div>
                     <div id="grid-dokumen" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4"></div>
                 `;
-                paparkanGridKad(jenis, index, senaraiData);
-                return;
+                return paparkanGridKad(jenis, index, senaraiData);
             }
 
             let paparanKandunganAkhir = isiKandungan;
@@ -714,10 +760,7 @@
             senaraiPautan.forEach((pautan, idx) => {
                 const barisBersih = pautan.trim();
                 if (barisBersih === "") return;
-
-                let tajukDokumen = "";
-                let linkBersih = "";
-
+                let tajukDokumen = "", linkBersih = "";
                 if (barisBersih.includes("|")) {
                     const pecahan = barisBersih.split("|");
                     tajukDokumen = pecahan[0].trim();
@@ -726,7 +769,6 @@
                     linkBersih = barisBersih;
                     tajukDokumen = `Kertas Kerja Bahagian ${idx + 1}`;
                 }
-
                 if (kataKunciCarian !== "" && !tajukDokumen.toLowerCase().includes(kataKunciCarian.toLowerCase())) return;
 
                 adaDokumen = true;
@@ -746,7 +788,6 @@
                 `;
                 gridContainer.appendChild(kad);
             });
-
             if (!adaDokumen) gridContainer.innerHTML = `<div class="col-span-full text-center py-8 text-gray-400 text-sm">Tiada kertas kerja sepadan.</div>`;
         }
 
@@ -761,7 +802,6 @@
             document.getElementById("modal-dokumen").classList.remove("hidden");
             document.body.style.overflow = "hidden";
         }
-
         function tutupModalDokumen() {
             document.getElementById("modal-dokumen").classList.add("hidden");
             document.getElementById("modal-iframe").src = "";
@@ -774,13 +814,11 @@
             else box.classList.add('hidden');
         }
 
-        // HANTAR BORANG RSK (TERMASUK MEDAN EMEL, PASSWORD & PAPAR TEL)
         async function hantarBorangRSK(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
             btn.disabled = true;
             btn.innerText = "Sila tunggu...";
-
             let rawNoTel = document.getElementById('rsk-notel').value.trim();
 
             const payload = {
@@ -807,23 +845,16 @@
             };
 
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload) 
-                });
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
                 const hasil = await res.json();
                 if(hasil.status === 'success' || hasil.success) {
                     alert(`Permohonan Berjaya Dihantar!\nID Permohonan Anda: ${hasil.idPermohonan || hasil.id}\nPengesahan dan butiran akaun telah dihantar ke emel anda.`);
                     e.target.reset();
                     document.getElementById('semak-id').value = hasil.idPermohonan || hasil.id;
                     document.getElementById('semak-pass').value = payload.password;
-                    // Buka tab semakan status secara automatik
                     const btnSemak = Array.from(document.querySelectorAll('#sidebar-rakan button')).find(b => b.innerText.includes('Semak Status'));
                     if (btnSemak) btnSemak.click();
-                } else {
-                    alert("Ralat: " + hasil.message);
-                }
+                } else alert("Ralat: " + hasil.message);
             } catch (err) {
                 alert("Gagal menghantar borang. Sila semak semula koneksi.");
             } finally {
@@ -832,460 +863,326 @@
             }
         }
 
-        // LOG MASUK & SEMAKAN STATUS KHAS PEMOHON
-        async function prosesLoginPemohon(e) {
-            e.preventDefault();
-            const idInput = document.getElementById('semak-id').value.trim().toLowerCase();
-            const passInput = document.getElementById('semak-pass').value.trim();
-            const box = document.getElementById('profil-pemohon-aktif');
-
-            box.classList.remove('hidden');
-            box.innerHTML = `<p class="text-purple-700 font-bold text-sm text-center py-4">Mengesahkan identiti pemohon...</p>`;
-
+        // ==========================================
+        // KHIDMAT NASIHAT - RSK ONLINE (FIREBASE)
+        // ==========================================
+        async function muatSenaraiRSKOnline() {
+            const container = document.getElementById('senarai-rsk-online');
+            if (!container) return;
+            container.innerHTML = `<p class="col-span-full text-center text-purple-700 font-semibold py-6">Memuatkan senarai Rakan Sulh yang sedang bertugas...</p>`;
             await muatTurunData(true);
             const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
-
-            const pemohon = dataRSK.find(i => {
-                const idSheet = (i.ID_Permohonan || i.id || i.ID || '').toString().trim().toLowerCase();
-                const passSheet = (i.Password || i.password || 'Sulh@123').toString().trim();
-                return (idSheet === idInput) && (passSheet === passInput);
+            
+            const rskOnline = dataRSK.filter(item => {
+                const statusLulus = (item.Status || item.status || '').toString().toUpperCase() === 'LULUS';
+                const statusOnline = (item.StatusOnline || item.statusonline || '').toString().toUpperCase() === 'ONLINE';
+                return statusLulus && statusOnline;
             });
 
-            if (!pemohon) {
-                box.innerHTML = `
-                    <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center text-sm">
-                        ID Permohonan atau Kata Laluan tidak sah. Jika anda belum pernah menukar kata laluan, cuba gunakan kata laluan semasa anda atau klik <strong>Lupa kata laluan</strong>.
+            if (rskOnline.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
+                        <p class="text-gray-600 font-semibold">Tiada Rakan Sulh Komuniti yang sedang dalam talian buat masa ini.</p>
+                        <p class="text-xs text-gray-400 mt-1">Sila semak semula sebentar lagi atau rujuk Direktori RSK untuk hubungi melalui emel.</p>
                     </div>
                 `;
                 return;
             }
 
+            container.innerHTML = rskOnline.map(rsk => {
+                const idUnik = rsk.ID_Permohonan || rsk.id || rsk.ID;
+                const nama = rsk.Nama || rsk.nama;
+                const kawasan = rsk.Kawasan || rsk.kawasan || 'Komuniti Setempat';
+                const peranan = rsk.PerananKomuniti || rsk.peranan || 'Rakan Sulh Komuniti';
+
+                return `
+                    <div class="bg-white border border-purple-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                    <span class="w-2 h-2 rounded-full bg-green-600 animate-ping"></span> ONLINE
+                                </span>
+                                <span class="text-[11px] text-gray-400 font-semibold">${idUnik}</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-lg">${nama}</h4>
+                            <p class="text-xs text-purple-700 font-semibold mb-2">${peranan}</p>
+                            <p class="text-xs text-gray-500 mb-4">📍 ${kawasan}</p>
+                        </div>
+                        <button onclick="mulakanChatAwam('${idUnik}', '${nama.replace(/'/g, "\\'")}')" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs py-3 rounded-xl transition cursor-pointer shadow">
+                            💬 Mula Chat Sekarang
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function mulakanChatAwam(idRSK, namaRSK) {
+            const namaPengunjung = prompt("Sila masukkan nama panggilan anda untuk memulakan sesi chat:");
+            if (!namaPengunjung || namaPengunjung.trim() === '') return;
+            const idSesi = 'SESI-' + Date.now();
+            perananChatSemasa = 'AWAM';
+            namaPenghantarChat = namaPengunjung.trim();
+            sesiChatSemasa = idSesi;
+            dbChat.ref(`sesi_chat/${idSesi}`).set({ idRSK: idRSK, namaRSK: namaRSK, namaAwam: namaPenghantarChat, status: 'AKTIF', masaMula: Date.now() });
+            dbChat.ref(`sesi_chat/${idSesi}/mesej`).push({ penghantar: 'SISTEM', teks: `Sesi khidmat nasihat antara ${namaPenghantarChat} dan ${namaRSK} telah dimulakan. Sila nyatakan persoalan anda.`, masa: Date.now() });
+            bukaTetingkapChat(idSesi, `Chat bersama ${namaRSK}`, `Anda log masuk sebagai: ${namaPenghantarChat}`, false);
+        }
+
+        function bukaTetingkapChat(idSesi, tajuk, subtajuk, isRSK) {
+            sesiChatSemasa = idSesi;
+            document.getElementById('chat-tajuk-rsk').innerText = tajuk;
+            document.getElementById('chat-subtajuk').innerText = subtajuk;
+            document.getElementById('modalChatRSK').classList.remove('hidden');
+            const btnTamat = document.getElementById('btn-tamat-sesi');
+            if (isRSK) btnTamat.classList.remove('hidden'); else btnTamat.classList.add('hidden');
+            const kotakMesej = document.getElementById('kotak-mesej-chat');
+            kotakMesej.innerHTML = '';
+
+            dbChat.ref(`sesi_chat/${idSesi}/status`).on('value', snapshot => {
+                if (snapshot.val() === 'TAMAT') {
+                    document.getElementById('notis-sesi-tamat').classList.remove('hidden');
+                    document.getElementById('form-hantar-mesej').classList.add('hidden');
+                } else {
+                    document.getElementById('notis-sesi-tamat').classList.add('hidden');
+                    document.getElementById('form-hantar-mesej').classList.remove('hidden');
+                }
+            });
+
+            dbChat.ref(`sesi_chat/${idSesi}/mesej`).off();
+            dbChat.ref(`sesi_chat/${idSesi}/mesej`).on('child_added', snapshot => {
+                const data = snapshot.val();
+                const div = document.createElement('div');
+                if (data.penghantar === 'SISTEM') {
+                    div.className = "text-center text-[11px] text-gray-500 bg-purple-50 py-1.5 px-3 rounded-lg border border-purple-100";
+                    div.innerText = data.teks;
+                } else {
+                    const isSaya = (data.peranan === perananChatSemasa);
+                    div.className = `flex flex-col ${isSaya ? 'items-end' : 'items-start'}`;
+                    div.innerHTML = `<span class="text-[10px] text-gray-400 mb-0.5 px-1">${data.penghantar}</span>
+                        <div class="max-w-[80%] px-3.5 py-2 rounded-2xl text-xs shadow-sm ${isSaya ? 'bg-purple-700 text-white rounded-br-none' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'}">${data.teks}</div>`;
+                }
+                kotakMesej.appendChild(div);
+                kotakMesej.scrollTop = kotakMesej.scrollHeight;
+            });
+        }
+
+        function hantarMesejChat(e) {
+            e.preventDefault();
+            if (!sesiChatSemasa) return;
+            const input = document.getElementById('input-mesej-chat');
+            const teks = input.value.trim();
+            if (!teks) return;
+            dbChat.ref(`sesi_chat/${sesiChatSemasa}/mesej`).push({ penghantar: namaPenghantarChat, peranan: perananChatSemasa, teks: teks, masa: Date.now() });
+            input.value = '';
+        }
+
+        function tamatkanSesiChat() {
+            if (!sesiChatSemasa || !confirm("Adakah anda pasti mahu menamatkan sesi chat ini?")) return;
+            dbChat.ref(`sesi_chat/${sesiChatSemasa}/mesej`).push({ penghantar: 'SISTEM', teks: 'Sesi khidmat nasihat telah ditamatkan oleh Rakan Sulh Komuniti.', masa: Date.now() });
+            dbChat.ref(`sesi_chat/${sesiChatSemasa}/status`).set('TAMAT');
+        }
+
+        function tutupModalChat() {
+            if (sesiChatSemasa) {
+                dbChat.ref(`sesi_chat/${sesiChatSemasa}/mesej`).off();
+                dbChat.ref(`sesi_chat/${sesiChatSemasa}/status`).off();
+            }
+            document.getElementById('modalChatRSK').classList.add('hidden');
+        }
+
+        function binaPanelChatRSK(idRSK, namaRSK, statusOnlineSemasa) {
+            const isOnline = statusOnlineSemasa.toUpperCase() === 'ONLINE';
+            rskAktifLogin = { id: idRSK, nama: namaRSK };
+            setTimeout(() => {
+                const senaraiSesiBox = document.getElementById('senarai-sesi-masuk-rsk');
+                if (!senaraiSesiBox) return;
+                dbChat.ref('sesi_chat').orderByChild('idRSK').equalTo(idRSK).on('value', snapshot => {
+                    const semuaSesi = snapshot.val();
+                    if (!semuaSesi) return senaraiSesiBox.innerHTML = `<p class="text-xs text-gray-400 italic">Tiada sesi chat aktif buat masa ini.</p>`;
+                    const kunciSesi = Object.keys(semuaSesi).reverse();
+                    senaraiSesiBox.innerHTML = kunciSesi.map(k => {
+                        const s = semuaSesi[k];
+                        const aktif = s.status === 'AKTIF';
+                        return `
+                            <div class="flex justify-between items-center p-3 bg-white rounded-xl border ${aktif ? 'border-green-300' : 'border-gray-200'}">
+                                <div><p class="text-xs font-bold text-gray-900">Pengunjung: ${s.namaAwam}</p><span class="text-[10px] font-bold px-2 py-0.5 rounded ${aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${aktif ? '● Sesi Aktif' : 'Sesi Tamat'}</span></div>
+                                <button onclick="bukaChatSebagaiRSK('${k}', '${s.namaAwam.replace(/'/g, "\\'")}')" class="bg-purple-700 hover:bg-purple-800 text-white text-xs px-3 py-1.5 rounded-lg font-bold cursor-pointer">Buka Chat</button>
+                            </div>
+                        `;
+                    }).join('');
+                });
+            }, 300);
+            return `
+                <div class="mt-4 p-5 rounded-xl border border-purple-200 bg-purple-50/60 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-purple-200 pb-3">
+                        <div><h4 class="font-bold text-purple-950 text-sm">🟢 Kawalan Khidmat Nasihat</h4><p class="text-xs text-gray-600">Tukar status kepada ONLINE hanya apabila bersedia menerima chat.</p></div>
+                        <div class="flex gap-2">
+                            <button onclick="setStatusOnlineRSK('${idRSK}', 'ONLINE')" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition ${isOnline ? 'bg-green-600 text-white shadow' : 'bg-white text-gray-600 border'}">Set ONLINE</button>
+                            <button onclick="setStatusOnlineRSK('${idRSK}', 'OFFLINE')" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition ${!isOnline ? 'bg-gray-700 text-white shadow' : 'bg-white text-gray-600 border'}">Set OFFLINE</button>
+                        </div>
+                    </div>
+                    <div><h5 class="text-xs font-bold text-purple-900 mb-2">📩 Senarai Sesi Chat Masuk:</h5><div id="senarai-sesi-masuk-rsk" class="space-y-2"><p class="text-xs text-gray-400">Menyemak sesi chat...</p></div></div>
+                </div>
+            `;
+        }
+
+        function bukaChatSebagaiRSK(idSesi, namaAwam) {
+            perananChatSemasa = 'RSK';
+            namaPenghantarChat = rskAktifLogin ? rskAktifLogin.nama : 'RSK';
+            bukaTetingkapChat(idSesi, `Sesi bersama ${namaAwam}`, `Bertugas sebagai: ${namaPenghantarChat}`, true);
+        }
+
+        async function setStatusOnlineRSK(idPermohonan, statusBaru) {
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'tukarStatusOnline', idPermohonan: idPermohonan, statusOnline: statusBaru }) });
+                const hasil = await res.json();
+                alert(hasil.message);
+                document.querySelector('#box-login-pemohon form').dispatchEvent(new Event('submit'));
+            } catch (e) { alert("Gagal mengemas kini status online."); }
+        }
+
+        // ==========================================
+        // PROSES LOGIN PEMOHON & PAPAR PROFIL
+        // ==========================================
+        async function prosesLoginPemohon(e) {
+            e.preventDefault();
+            const idInput = document.getElementById('semak-id').value.trim().toLowerCase();
+            const passInput = document.getElementById('semak-pass').value.trim();
+            const box = document.getElementById('profil-pemohon-aktif');
+            box.classList.remove('hidden');
+            box.innerHTML = `<p class="text-purple-700 font-bold text-sm text-center py-4">Mengesahkan identiti pemohon...</p>`;
+
+            await muatTurunData(true);
+            const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
+            const pemohon = dataRSK.find(i => (i.ID_Permohonan || i.id || i.ID || '').toString().trim().toLowerCase() === idInput && (i.Password || i.password || 'Sulh@123').toString().trim() === passInput);
+
+            if (!pemohon) return box.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center text-sm">ID Permohonan atau Kata Laluan tidak sah. Cuba gunakan kata laluan asal atau tekan Lupa kata laluan.</div>`;
+
             const statusVal = (pemohon.Status || pemohon.status || 'BARU').toUpperCase();
             const idUnik = pemohon.ID_Permohonan || pemohon.id || pemohon.ID;
-            const namaPemohon = pemohon.Nama || pemohon.nama;
-            const telPemohon = pemohon.NoTel || pemohon.notel || pemohon.telefon || pemohon.Telefon || '';
-            const emelPemohon = pemohon.Emel || pemohon.emel || pemohon.Email || pemohon.email || '';
-            const kawasanPemohon = pemohon.Kawasan || pemohon.kawasan || pemohon.alamat || pemohon.Alamat || '';
-            const tarikhBersih = bersihkanTarikh(pemohon.Tarikh || pemohon.tarikh);
-            const isPaparTel = (pemohon.PaparTel || pemohon.papartel || '').toString().toUpperCase() === 'YA';
-
-            let badge = "bg-yellow-100 text-yellow-800 border-yellow-200";
-            if(statusVal === "LULUS") badge = "bg-green-100 text-green-800 border-green-200";
-            if(statusVal === "TOLAK") badge = "bg-red-100 text-red-800 border-red-200";
-            if(statusVal === "KIV") badge = "bg-blue-100 text-blue-800 border-blue-200";
+            let badge = statusVal === "LULUS" ? "bg-green-100 text-green-800 border-green-200" : statusVal === "TOLAK" ? "bg-red-100 text-red-800 border-red-200" : statusVal === "KIV" ? "bg-blue-100 text-blue-800 border-blue-200" : "bg-yellow-100 text-yellow-800 border-yellow-200";
 
             box.innerHTML = `
                 <div class="p-6 border border-purple-100 rounded-2xl bg-white shadow-sm space-y-4">
                     <div class="flex justify-between items-start border-b pb-4">
                         <div>
                             <span class="text-xs font-semibold text-purple-700 uppercase tracking-wider">Akaun Pemohon RSK</span>
-                            <h3 class="text-xl font-bold text-gray-900">${namaPemohon}</h3>
-                            <p class="text-xs text-gray-500">ID: <span class="font-bold text-purple-800">${idUnik}</span> | Tarikh: <strong>${tarikhBersih}</strong></p>
+                            <h3 class="text-xl font-bold text-gray-900">${pemohon.Nama || pemohon.nama}</h3>
+                            <p class="text-xs text-gray-500">ID: <span class="font-bold text-purple-800">${idUnik}</span></p>
                         </div>
                         <span class="px-3 py-1 text-xs font-extrabold rounded-full border ${badge}">${statusVal}</span>
                     </div>
+                    ${pemohon.CatatanUrusetia ? `<div class="bg-purple-50 border border-purple-200 p-3 rounded-xl text-xs text-purple-950"><strong>Nota Urusetia:</strong> ${pemohon.CatatanUrusetia}</div>` : ''}
+                    
+                    <!-- PANEL CHAT RSK JIKA LULUS -->
+                    ${statusVal === 'LULUS' ? binaPanelChatRSK(idUnik, pemohon.Nama || pemohon.nama, pemohon.StatusOnline || 'OFFLINE') : ''}
 
-                    ${pemohon.CatatanUrusetia ? `
-                        <div class="bg-purple-50 border border-purple-200 p-3 rounded-xl text-xs text-purple-950">
-                            <strong>Nota Urusetia:</strong> ${pemohon.CatatanUrusetia}
-                        </div>
-                    ` : ''}
-
-                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                        <h4 class="font-bold text-purple-900 text-sm mb-3">✏️ Kemaskini Maklumat Profil & Kata Laluan:</h4>
+                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 mt-4">
+                        <h4 class="font-bold text-purple-900 text-sm mb-3">✏️ Kemaskini Profil & Kata Laluan:</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">No. Telefon (WhatsApp):</label>
-                                <input type="text" id="edit-tel-${idUnik}" value="${telPemohon}" class="w-full text-xs p-2.5 border rounded-xl bg-white focus:ring-2 focus:ring-purple-600 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Alamat Emel:</label>
-                                <input type="email" id="edit-emel-${idUnik}" value="${emelPemohon}" class="w-full text-xs p-2.5 border rounded-xl bg-white focus:ring-2 focus:ring-purple-600 outline-none">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Kawasan Kediaman Utama:</label>
-                                <input type="text" id="edit-kawasan-${idUnik}" value="${kawasanPemohon}" class="w-full text-xs p-2.5 border rounded-xl bg-white focus:ring-2 focus:ring-purple-600 outline-none">
-                            </div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">No. Telefon:</label><input type="text" id="edit-tel-${idUnik}" value="${pemohon.NoTel || pemohon.notel || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Alamat Emel:</label><input type="email" id="edit-emel-${idUnik}" value="${pemohon.Emel || pemohon.emel || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none"></div>
+                            <div class="md:col-span-2"><label class="block text-xs font-semibold text-gray-600 mb-1">Kawasan Kediaman Utama:</label><input type="text" id="edit-kawasan-${idUnik}" value="${pemohon.Kawasan || pemohon.kawasan || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none"></div>
                             <div class="md:col-span-2 bg-white p-3.5 rounded-xl border border-purple-100">
-                                <label class="block text-xs font-bold text-purple-950 mb-1">Tukar Kata Laluan Baharu (Biarkan kosong jika tidak mahu tukar):</label>
-                                <div class="relative">
-                                    <input type="password" id="edit-pass-${idUnik}" placeholder="Masukkan kata laluan baharu" class="w-full text-xs p-2.5 pr-20 border rounded-xl bg-white focus:ring-2 focus:ring-purple-600 outline-none">
-                                    <button type="button" onclick="toggleLihatPass('edit-pass-${idUnik}', this)" class="absolute right-3 top-2 text-gray-500 hover:text-purple-700 text-xs font-semibold cursor-pointer">
-                                        👁️ Papar
-                                    </button>
-                                </div>
+                                <label class="block text-xs font-bold text-purple-950 mb-1">Tukar Kata Laluan Baharu:</label>
+                                <input type="password" id="edit-pass-${idUnik}" placeholder="Kosongkan jika tidak tukar" class="w-full text-xs p-2.5 border rounded-xl outline-none">
                             </div>
                         </div>
-
                         <div class="flex items-center gap-2 mb-4 bg-white p-3 rounded-xl border border-gray-200">
-                            <input type="checkbox" id="edit-papar-${idUnik}" ${isPaparTel ? 'checked' : ''} class="h-4 w-4 text-purple-600 rounded">
-                            <label for="edit-papar-${idUnik}" class="text-xs text-gray-700 cursor-pointer">
-                                Paparkan No. Telefon saya kepada orang awam dalam direktori carian RSK jika telah lulus.
-                            </label>
+                            <input type="checkbox" id="edit-papar-${idUnik}" ${(pemohon.PaparTel || '').toString().toUpperCase() === 'YA' ? 'checked' : ''} class="h-4 w-4 text-purple-600 rounded">
+                            <label for="edit-papar-${idUnik}" class="text-xs text-gray-700 cursor-pointer">Papar No. Telefon dalam direktori awam jika lulus.</label>
                         </div>
-
-                        <button onclick="simpanKemaskiniPemohon('${idUnik}')" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition cursor-pointer shadow">
-                            Simpan Perubahan
-                        </button>
+                        <button onclick="simpanKemaskiniPemohon('${idUnik}')" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition cursor-pointer shadow">Simpan Perubahan</button>
                     </div>
                 </div>
             `;
         }
 
         async function simpanKemaskiniPemohon(idPermohonan) {
-            const telBaru = document.getElementById(`edit-tel-${idPermohonan}`).value.trim();
-            const emelBaru = document.getElementById(`edit-emel-${idPermohonan}`).value.trim();
-            const kawasanBaru = document.getElementById(`edit-kawasan-${idPermohonan}`).value.trim();
-            const paparTelBaru = document.getElementById(`edit-papar-${idPermohonan}`).checked;
-            const passBaru = document.getElementById(`edit-pass-${idPermohonan}`).value.trim();
-
-            if (!telBaru || !emelBaru || !kawasanBaru) {
-                return alert("Sila pastikan No. Telefon, Emel dan Kawasan diisi!");
-            }
-
             const payload = {
-                action: "kemaskiniProfilPemohon",
-                idPermohonan: idPermohonan,
-                notel: telBaru,
-                emel: emelBaru,
-                kawasan: kawasanBaru,
-                paparTel: paparTelBaru,
-                passwordBaru: passBaru
+                action: "kemaskiniProfilPemohon", idPermohonan: idPermohonan,
+                notel: document.getElementById(`edit-tel-${idPermohonan}`).value.trim(),
+                emel: document.getElementById(`edit-emel-${idPermohonan}`).value.trim(),
+                kawasan: document.getElementById(`edit-kawasan-${idPermohonan}`).value.trim(),
+                paparTel: document.getElementById(`edit-papar-${idPermohonan}`).checked,
+                passwordBaru: document.getElementById(`edit-pass-${idPermohonan}`).value.trim()
             };
-
+            if (!payload.notel || !payload.emel || !payload.kawasan) return alert("Sila pastikan No. Telefon, Emel dan Kawasan diisi!");
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload) 
-                });
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const hasil = await res.json();
-                if(hasil.status === 'success' || hasil.success) {
-                    alert("Maklumat profil & kata laluan anda berjaya dikemaskini!");
-                    await muatTurunData(true);
-                    if (passBaru) document.getElementById('semak-pass').value = passBaru;
-                } else {
-                    alert("Ralat: " + (hasil.message || "Gagal mengemaskini"));
-                }
-            } catch(e) {
-                alert("Gagal menghantar kemaskini data profil.");
-            }
+                if(hasil.status === 'success') { alert("Maklumat berjaya dikemaskini!"); if(payload.passwordBaru) document.getElementById('semak-pass').value = payload.passwordBaru; await muatTurunData(true); } 
+                else alert("Ralat: " + hasil.message);
+            } catch(e) { alert("Gagal menghantar kemaskini."); }
         }
 
-        function bukaModalLupaPass() {
-            document.getElementById('modalLupaPass').classList.remove('hidden');
-        }
-
-        function tutupModalLupaPass() {
-            document.getElementById('modalLupaPass').classList.add('hidden');
-        }
-
+        function bukaModalLupaPass() { document.getElementById('modalLupaPass').classList.remove('hidden'); }
+        function tutupModalLupaPass() { document.getElementById('modalLupaPass').classList.add('hidden'); }
         async function prosesHantarLupaPass(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-lupa-pass');
-            btn.disabled = true;
-            btn.innerText = "Mengesahkan...";
-
-            const payload = {
-                action: "lupaPassword",
-                idPermohonan: document.getElementById('lupa-id').value.trim(),
-                pengesah: document.getElementById('lupa-auth').value.trim()
-            };
-
+            e.preventDefault(); const btn = document.getElementById('btn-lupa-pass'); btn.disabled = true; btn.innerText = "Mengesahkan...";
+            const payload = { action: "lupaPassword", idPermohonan: document.getElementById('lupa-id').value.trim(), pengesah: document.getElementById('lupa-auth').value.trim() };
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-                const hasil = await res.json();
-                alert(hasil.message);
-                if (hasil.status === 'success') {
-                    tutupModalLupaPass();
-                    document.getElementById('semak-id').value = payload.idPermohonan;
-                    if (hasil.tempPassword) {
-                        document.getElementById('semak-pass').value = hasil.tempPassword;
-                    }
-                }
-            } catch(err) {
-                alert("Ralat memproses permohonan kata laluan.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Hantar & Jana Kata Laluan";
-            }
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const hasil = await res.json(); alert(hasil.message);
+                if (hasil.status === 'success') { tutupModalLupaPass(); document.getElementById('semak-id').value = payload.idPermohonan; if (hasil.tempPassword) document.getElementById('semak-pass').value = hasil.tempPassword; }
+            } catch(err) { alert("Ralat memproses permohonan."); } finally { btn.disabled = false; btn.innerText = "Hantar & Jana Kata Laluan"; }
         }
 
-        // SUBMODUL: CARIAN AWAM DIREKTORI RSK
         function laksanaCarianAwam() {
             const input = (document.getElementById('input-carian-awam')?.value || '').trim().toLowerCase();
             const grid = document.getElementById('hasil-carian-awam');
             if(!grid) return;
-
-            const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
-            
-            const senaraiLulus = dataRSK.filter(item => {
-                const status = (item.Status || item.status || '').toString().toUpperCase();
-                return status === 'LULUS';
-            });
-
-            const hasil = senaraiLulus.filter(item => {
-                const nama = (item.Nama || item.nama || '').toString().toLowerCase();
-                const kawasan = (item.Kawasan || item.kawasan || item.alamat || '').toString().toLowerCase();
-                const emel = (item.Emel || item.emel || '').toString().toLowerCase();
-                if(!input) return true;
-                return nama.includes(input) || kawasan.includes(input) || emel.includes(input);
-            });
-
-            if(hasil.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-8 text-gray-400 text-sm">Tiada Rakan Sulh ditemui untuk padanan carian.</div>`;
-                return;
-            }
-
-            grid.innerHTML = hasil.map(ahli => {
-                const nama = ahli.Nama || ahli.nama;
-                const emel = ahli.Emel || ahli.emel || 'Tiada emel';
-                const kawasan = ahli.Kawasan || ahli.kawasan || ahli.alamat || 'Tiada maklumat kawasan';
-                const isPaparTel = (ahli.PaparTel || ahli.papartel || '').toString().toUpperCase() === 'YA';
-                const noTel = ahli.NoTel || ahli.notel || ahli.telefon || ahli.Telefon || '-';
-
-                return `
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-                                ${nama.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-900 text-base leading-tight">${nama}</h4>
-                                <span class="text-[11px] bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-bold">Rakan Sulh Komuniti</span>
-                            </div>
-                        </div>
-                        <div class="space-y-1.5 text-xs text-gray-600">
-                            <p><strong>📍 Kawasan:</strong> ${kawasan}</p>
-                            <p><strong>✉️ Emel:</strong> <a href="mailto:${emel}" class="text-purple-700 hover:underline">${emel}</a></p>
-                            <p><strong>📞 Telefon:</strong> ${isPaparTel ? `<span class="font-semibold text-purple-900">${noTel}</span>` : `<span class="text-gray-400 italic">Dirahsiakan</span>`}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            const hasil = (mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || []).filter(item => (item.Status || '').toString().toUpperCase() === 'LULUS' && ((item.Nama || '').toLowerCase().includes(input) || (item.Kawasan || '').toLowerCase().includes(input) || (item.Emel || '').toLowerCase().includes(input)));
+            if(hasil.length === 0) return grid.innerHTML = `<div class="col-span-full text-center py-8 text-gray-400 text-sm">Tiada Rakan Sulh ditemui.</div>`;
+            grid.innerHTML = hasil.map(a => `<div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm"><h4 class="font-bold text-gray-900">${a.Nama || a.nama}</h4><p class="text-xs text-gray-600 mt-2">📍 ${a.Kawasan || a.kawasan || '-'}<br>✉️ ${a.Emel || a.emel || '-'}<br>📞 ${(a.PaparTel || '').toString().toUpperCase() === 'YA' ? a.NoTel : 'Dirahsiakan'}</p></div>`).join('');
         }
 
-        // PORTAL ADMIN LOG IN & DASHBOARD
         function prosesLoginAdmin(e) {
-            e.preventDefault();
-            const u = document.getElementById('admin-user').value.trim();
-            const p = document.getElementById('admin-pass').value.trim();
-            
-            const senaraiAdmin = mentahDataSemua.Admin || [];
-            const sah = senaraiAdmin.find(a => (a.Username || '').toString() === u && (a.Password || '').toString() === p);
-
-            if(sah) {
-                document.getElementById('admin-login-box').classList.add('hidden');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-                document.getElementById('nama-admin-aktif').innerText = sah.Nama || u;
-                binaJadualAdmin();
-            } else {
-                alert("ID Pengguna atau Kata Laluan Salah!");
-            }
+            e.preventDefault(); const u = document.getElementById('admin-user').value.trim(), p = document.getElementById('admin-pass').value.trim();
+            const sah = (mentahDataSemua.Admin || []).find(a => (a.Username || '') == u && (a.Password || '') == p);
+            if(sah) { document.getElementById('admin-login-box').classList.add('hidden'); document.getElementById('admin-dashboard').classList.remove('hidden'); document.getElementById('nama-admin-aktif').innerText = sah.Nama || u; binaJadualAdmin(); }
+            else alert("ID Pengguna atau Kata Laluan Salah!");
         }
-
-        function logoutAdmin() {
-            document.getElementById('admin-login-box').classList.remove('hidden');
-            document.getElementById('admin-dashboard').classList.add('hidden');
-        }
-
+        function logoutAdmin() { document.getElementById('admin-login-box').classList.remove('hidden'); document.getElementById('admin-dashboard').classList.add('hidden'); }
+        
         function binaJadualAdmin() {
-            const tbody = document.getElementById('jadual-admin-body');
-            tbody.innerHTML = "";
+            const tbody = document.getElementById('jadual-admin-body'); tbody.innerHTML = "";
             const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
-
-            if(dataRSK.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Tiada permohonan diterima lagi.</td></tr>`;
-                return;
-            }
-
+            if(dataRSK.length === 0) return tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Tiada permohonan.</td></tr>`;
             dataRSK.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-purple-50/50 transition";
-                const idUnik = item.ID_Permohonan || item.id || item.ID;
-                const statusVal = item.Status || item.status || 'BARU';
-                const tarikhBersih = bersihkanTarikh(item.Tarikh || item.tarikh);
-                const emel = item.Emel || item.emel || '-';
-
-                tr.innerHTML = `
-                    <td class="p-3">
-                        <button onclick="bukaKertasKerjaAdmin('${idUnik}')" class="font-bold text-xs text-purple-700 hover:underline cursor-pointer text-left block">
-                            ${idUnik}
-                        </button>
-                        <div class="text-[10px] text-gray-400 font-bold">${tarikhBersih}</div>
-                    </td>
-                    <td class="p-3">
-                        <div class="font-bold text-gray-900">${item.Nama || item.nama}</div>
-                        <div class="text-xs text-gray-500">${item.Umur || ''} | ${item.Pekerjaan || ''}</div>
-                    </td>
-                    <td class="p-3 text-xs">
-                        <div>📞 ${item.NoTel || item.notel || '-'}</div>
-                        <div class="text-gray-500">✉️ ${emel}</div>
-                    </td>
-                    <td class="p-3 text-xs text-gray-600">
-                        ${item.Kawasan || item.kawasan || '-'}
-                    </td>
-                    <td class="p-3">
-                        <span class="px-2 py-1 text-xs font-bold rounded-md ${statusVal === 'LULUS' ? 'bg-green-100 text-green-800' : statusVal === 'TOLAK' ? 'bg-red-100 text-red-800' : statusVal === 'KIV' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}">${statusVal}</span>
-                    </td>
-                    <td class="p-3 text-center space-x-1">
-                        <button onclick="kemaskiniStatus('${idUnik}', 'LULUS')" class="bg-green-600 text-white text-xs px-2 py-1 rounded-md hover:bg-green-700 cursor-pointer shadow-sm">Lulus</button>
-                        <button onclick="kemaskiniStatus('${idUnik}', 'KIV')" class="bg-blue-600 text-white text-xs px-2 py-1 rounded-md hover:bg-blue-700 cursor-pointer shadow-sm">KIV</button>
-                        <button onclick="kemaskiniStatus('${idUnik}', 'TOLAK')" class="bg-red-600 text-white text-xs px-2 py-1 rounded-md hover:bg-red-700 cursor-pointer shadow-sm">Tolak</button>
-                    </td>
-                `;
+                const tr = document.createElement('tr'); tr.className = "hover:bg-purple-50/50";
+                const idUnik = item.ID_Permohonan || item.id || item.ID, statusVal = item.Status || 'BARU';
+                tr.innerHTML = `<td class="p-3"><button onclick="bukaKertasKerjaAdmin('${idUnik}')" class="font-bold text-xs text-purple-700 hover:underline block">${idUnik}</button><div class="text-[10px] text-gray-400">${bersihkanTarikh(item.Tarikh || item.tarikh)}</div></td><td class="p-3"><div class="font-bold">${item.Nama || item.nama}</div><div class="text-xs text-gray-500">${item.Umur || ''}</div></td><td class="p-3 text-xs">📞 ${item.NoTel || '-'}<br>✉️ ${item.Emel || '-'}</td><td class="p-3 text-xs">${item.Kawasan || '-'}</td><td class="p-3"><span class="px-2 py-1 text-xs font-bold rounded-md bg-gray-100">${statusVal}</span></td><td class="p-3 text-center space-x-1"><button onclick="kemaskiniStatus('${idUnik}', 'LULUS')" class="bg-green-600 text-white text-xs px-2 py-1 rounded">Lulus</button><button onclick="kemaskiniStatus('${idUnik}', 'KIV')" class="bg-blue-600 text-white text-xs px-2 py-1 rounded">KIV</button><button onclick="kemaskiniStatus('${idUnik}', 'TOLAK')" class="bg-red-600 text-white text-xs px-2 py-1 rounded">Tolak</button></td>`;
                 tbody.appendChild(tr);
             });
         }
-
+        
         function bukaKertasKerjaAdmin(idPermohonan) {
-            const dataRSK = mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || [];
-            const pemohon = dataRSK.find(p => (p.ID_Permohonan || p.id || p.ID || '').toString().trim() === idPermohonan.toString().trim());
-
-            if(!pemohon) return alert('Data permohonan tidak dijumpai bagi ID: ' + idPermohonan);
-
-            const getVal = (keys) => {
-                for (let k of keys) {
-                    if (pemohon[k] !== undefined && pemohon[k] !== '') return pemohon[k];
-                }
-                return '-';
-            };
-
-            const nama = getVal(['Nama', 'nama']);
-            const umur = getVal(['Umur', 'umur']);
-            const pekerjaan = getVal(['Pekerjaan', 'pekerjaan']);
-            const notel = getVal(['NoTel', 'notel', 'Telefon']);
-            const emel = getVal(['Emel', 'emel', 'Email']);
-            const kawasan = getVal(['Kawasan', 'kawasan', 'Alamat']);
-            const peranan = getVal(['PerananKomuniti', 'peranan']);
-            const penglibatan = getVal(['Penglibatan', 'penglibatan']);
-            const latihan = getVal(['LatihanSulh', 'latihan']);
-            const namaKursus = getVal(['NamaKursus', 'namaKursus']);
-            const keyakinan = getVal(['Keyakinan', 'keyakinan']);
-            const sebabBerminat = getVal(['SebabBerminat', 'sebabBerminat']);
-            const kualiti = getVal(['KualitiUtama', 'kualiti']);
-            const situasi = getVal(['SituasiParking', 'situasi']);
-            const komitmenHadir = getVal(['HadirLatihan', 'komitmenHadir']);
-            const komitmenMasa = getVal(['MasaSukarela', 'komitmenMasa']);
-            const ringkasan = getVal(['RingkasanWajar', 'ringkasan']);
-
-            document.getElementById('modalNoID').innerText = `ID Permohonan: ${idPermohonan}`;
-            
-            document.getElementById('kandunganKertasKerja').innerHTML = `
-                <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><span class="font-bold text-gray-500 text-xs block">NAMA PEMOHON</span> <span class="font-bold text-purple-950 text-base">${nama}</span></div>
-                    <div><span class="font-bold text-gray-500 text-xs block">UMUR & PEKERJAAN</span> <span class="font-semibold text-purple-950">${umur} (${pekerjaan})</span></div>
-                    <div><span class="font-bold text-gray-500 text-xs block">NO. TELEFON</span> <span class="font-semibold text-purple-950">${notel}</span></div>
-                    <div><span class="font-bold text-gray-500 text-xs block">EMEL</span> <span class="font-semibold text-purple-950">${emel}</span></div>
-                    <div class="col-span-1 md:col-span-2"><span class="font-bold text-gray-500 text-xs block">KAWASAN KEDIAMAN</span> <span class="font-semibold text-purple-950">${kawasan}</span></div>
-                    <div class="col-span-1 md:col-span-2"><span class="font-bold text-gray-500 text-xs block">PERANAN KOMUNITI</span> <span class="font-semibold text-purple-950">${peranan}</span></div>
-                </div>
-
-                <div class="space-y-4">
-                    <h4 class="font-bold text-purple-900 border-b border-purple-200 pb-1 text-sm">Penilaian Jawapan Soalan Borang:</h4>
-                    <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm space-y-2">
-                        <p class="text-xs text-purple-900 font-bold">1. Penglibatan & Kemahiran:</p>
-                        <p class="text-xs text-gray-700">• <strong>Penglibatan:</strong> ${penglibatan}</p>
-                        <p class="text-xs text-gray-700">• <strong>Latihan Sulh:</strong> ${latihan} (Kursus: ${namaKursus})</p>
-                        <p class="text-xs text-gray-700">• <strong>Keyakinan:</strong> <span class="font-bold text-purple-800">${keyakinan}/10</span></p>
-                    </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm space-y-2">
-                        <p class="text-xs text-purple-900 font-bold">2. Kecenderungan:</p>
-                        <p class="text-xs text-gray-700">• <strong>Sebab:</strong> ${sebabBerminat}</p>
-                        <p class="text-xs text-gray-700">• <strong>Kualiti Utama:</strong> ${kualiti}</p>
-                        <p class="text-xs text-gray-700">• <strong>Situasi Jiran:</strong> ${situasi}</p>
-                    </div>
-                    <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm space-y-1">
-                        <p class="text-xs text-purple-900 font-bold">3. Komitmen:</p>
-                        <p class="text-xs text-gray-700">• <strong>Hadir Latihan:</strong> ${komitmenHadir}</p>
-                        <p class="text-xs text-gray-700">• <strong>Masa Sukarela:</strong> ${komitmenMasa}</p>
-                        <div class="mt-2 text-xs text-gray-800 bg-purple-50 p-3 rounded-lg border border-purple-100">
-                            <strong>Wajar Dipilih Kerana:</strong>
-                            <p class="italic text-purple-950 mt-1">"${ringkasan}"</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('modalActionButtons').innerHTML = `
-                <button onclick="kemaskiniStatus('${idPermohonan}', 'LULUS'); tutupModalPenilaian();" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition shadow">LULUS</button>
-                <button onclick="kemaskiniStatus('${idPermohonan}', 'KIV'); tutupModalPenilaian();" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition shadow">KIV</button>
-                <button onclick="kemaskiniStatus('${idPermohonan}', 'TOLAK'); tutupModalPenilaian();" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition shadow">TOLAK</button>
-            `;
-
-            const modalEl = document.getElementById('modalPenilaianAdmin');
-            modalEl.classList.remove('hidden');
-            modalEl.classList.add('flex');
+            const p = (mentahDataSemua.PermohonanRSK || mentahDataSemua.Pendaftaran || []).find(x => (x.ID_Permohonan || x.id || '').toString().trim() === idPermohonan);
+            if(!p) return alert('Data tidak dijumpai');
+            document.getElementById('modalNoID').innerText = idPermohonan;
+            document.getElementById('kandunganKertasKerja').innerHTML = `<div class="bg-purple-50 p-4 rounded-xl mb-4"><strong>${p.Nama || p.nama}</strong><br>Telefon: ${p.NoTel || '-'}<br>Emel: ${p.Emel || '-'}</div><p><strong>Penglibatan:</strong> ${p.Penglibatan || '-'}</p><p><strong>Sebab:</strong> ${p.SebabBerminat || '-'}</p>`;
+            document.getElementById('modalActionButtons').innerHTML = `<button onclick="kemaskiniStatus('${idPermohonan}', 'LULUS'); tutupModalPenilaian();" class="bg-green-600 text-white px-4 py-2 rounded">LULUS</button><button onclick="kemaskiniStatus('${idPermohonan}', 'TOLAK'); tutupModalPenilaian();" class="bg-red-600 text-white px-4 py-2 rounded">TOLAK</button>`;
+            document.getElementById('modalPenilaianAdmin').classList.remove('hidden');
+            document.getElementById('modalPenilaianAdmin').classList.add('flex');
         }
-
-        function tutupModalPenilaian() {
-            const modalEl = document.getElementById('modalPenilaianAdmin');
-            modalEl.classList.add('hidden');
-            modalEl.classList.remove('flex');
-        }
-
+        function tutupModalPenilaian() { document.getElementById('modalPenilaianAdmin').classList.add('hidden'); document.getElementById('modalPenilaianAdmin').classList.remove('flex'); }
         async function kemaskiniStatus(idPermohonan, statusBaru) {
-            const nota = prompt(`Catatan Urusetia untuk [${idPermohonan}] (Opsional):`);
-            if (nota === null) return;
-
-            const payload = {
-                action: "updateStatus",
-                idPermohonan: idPermohonan,
-                statusBaru: statusBaru,
-                catatan: nota
-            };
-
+            const nota = prompt(`Catatan Urusetia untuk [${idPermohonan}]:`); if (nota === null) return;
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload) 
-                });
-                const hasil = await res.json();
-                alert(hasil.message || "Status dikemaskini dan emel pemakluman dihantar!");
-                await muatTurunData(true);
-                binaJadualAdmin();
-            } catch (err) {
-                alert("Gagal mengemaskini status.");
-            }
+                const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateStatus", idPermohonan: idPermohonan, statusBaru: statusBaru, catatan: nota }) });
+                alert((await res.json()).message || "Status dikemaskini"); await muatTurunData(true); binaJadualAdmin();
+            } catch (err) { alert("Gagal mengemaskini status."); }
         }
 
         function semakDirectLink() {
-            const hash = window.location.hash.toLowerCase();
-
-            if (hash === '#pendaftaran-rsk' || hash === '#pendaftaran') {
-                const allNavLinks = Array.from(document.querySelectorAll('nav a, nav button, header button, header a'));
-                const menuRakanSulh = allNavLinks.find(el => {
-                    const txt = el.textContent.trim().toLowerCase();
-                    return txt === 'rakan sulh komuniti' || txt.includes('rakan sulh');
-                });
-
-                if (menuRakanSulh) menuRakanSulh.click();
-
-                setTimeout(() => {
-                    const sidebarLinks = Array.from(document.querySelectorAll('#sidebar-rakan button'));
-                    const btnPendaftaran = sidebarLinks.find(el => {
-                        const txt = el.textContent.trim().toLowerCase();
-                        return txt.includes('pendaftaran rsk') || txt === 'pendaftaran rsk';
-                    });
-
-                    if (btnPendaftaran) {
-                        btnPendaftaran.click();
-                        btnPendaftaran.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }, 500);
+            if (window.location.hash.toLowerCase().includes('#pendaftaran')) {
+                const nav = Array.from(document.querySelectorAll('nav button')).find(el => el.textContent.toLowerCase().includes('rakan sulh'));
+                if (nav) nav.click();
+                setTimeout(() => { const btn = Array.from(document.querySelectorAll('#sidebar-rakan button')).find(el => el.textContent.toLowerCase().includes('pendaftaran')); if (btn) btn.click(); }, 500);
             }
         }
-
-        window.onload = () => {
-            muatTurunData();
-            setTimeout(semakDirectLink, 300);
-        };
-
+        window.onload = () => { muatTurunData(); setTimeout(semakDirectLink, 300); };
         window.addEventListener('hashchange', semakDirectLink);
     </script>
 </body>
