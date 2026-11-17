@@ -56,13 +56,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex-shrink-0 flex items-center">
-                    <span class="text-2xl font-bold text-purple-900 tracking-wider cursor-pointer" onclick="tukarTab('home')">PORTAL RAKAN SULH KOMUNITI</span>
+                    <span class="text-xl md:text-2xl font-bold text-purple-900 tracking-wider cursor-pointer" onclick="tukarTab('home')">PORTAL RAKAN SULH KOMUNITI</span>
                 </div>
-                <div class="hidden md:flex space-x-4 lg:space-x-6 font-semibold text-gray-600 items-center text-sm lg:text-base">
+                <div class="flex space-x-3 md:space-x-6 font-semibold text-gray-600 items-center text-xs md:text-base">
                     <button onclick="tukarTab('home')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Home</button>
                     <button onclick="tukarTab('info')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Info Sulh</button>
                     <button onclick="tukarTab('rakan')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer">Rakan Sulh Komuniti</button>
-                    <!-- Butang Nasihat Online -->
                     <button onclick="tukarTab('nasihat')" class="hover:text-purple-700 pb-1 border-b-2 border-transparent hover:border-purple-700 transition cursor-pointer flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Khidmat Nasihat
                     </button>
@@ -83,7 +82,7 @@
     </div>
 
     <!-- 4. KANDUNGAN UTAMA -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
         
         <!-- TAB 1: HOME -->
         <div id="tab-home" class="tab-content block">
@@ -106,10 +105,8 @@
         <!-- TAB 3: RAKAN SULH KOMUNITI -->
         <div id="tab-rakan" class="tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- SIDEBAR DINAMIK RSK -->
                 <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit space-y-2" id="sidebar-rakan"></div>
                 
-                <!-- PAPARAN KANDUNGAN UTAMA RSK -->
                 <div class="md:col-span-3 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 min-h-[400px]">
                     
                     <!-- A. KANDUNGAN STANDARD -->
@@ -303,7 +300,6 @@
                             <p class="text-sm text-gray-500 mt-1">Sila log masuk menggunakan ID Permohonan dan Kata Laluan anda.</p>
                         </div>
 
-                        <!-- KOTAK LOGIN PEMOHON -->
                         <div id="box-login-pemohon" class="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 mb-6 max-w-xl">
                             <form onsubmit="prosesLoginPemohon(event)" class="space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -333,7 +329,6 @@
                             </form>
                         </div>
 
-                        <!-- HASIL PROFIL DAN STATUS PEMOHON (SELEPAS LOGIN) -->
                         <div id="profil-pemohon-aktif" class="hidden"></div>
                     </div>
 
@@ -362,16 +357,14 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-purple-950">💬 Khidmat Nasihat Sulh Dalam Talian (Percuma)</h2>
-                        <p class="text-sm text-gray-500 mt-1">Pilih Rakan Sulh Komuniti yang sedang <strong>Online</strong> untuk memulakan sesi perbualan sulit tanpa mendedahkan nombor telefon.</p>
+                        <p class="text-sm text-gray-500 mt-1">Pilih Rakan Sulh Komuniti yang sedang <strong>Online</strong> untuk memulakan sesi perbualan sulit (chat & sidang video) tanpa mendedahkan nombor telefon.</p>
                     </div>
                     <button onclick="muatSenaraiRSKOnline()" class="text-xs bg-purple-100 text-purple-800 px-4 py-2 rounded-xl font-bold hover:bg-purple-200 transition cursor-pointer">
-                        🔄 Refresh
+                        🔄 Segar Semula Senarai
                     </button>
                 </div>
         
-                <div id="senarai-rsk-online" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Kad RSK Online dijana secara dinamik -->
-                </div>
+                <div id="senarai-rsk-online" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
         </div>
 
@@ -487,30 +480,47 @@
         </div>
     </div>
 
-    <!-- POP-UP MODAL BILIK CHAT REAL-TIME -->
-    <div id="modalChatRSK" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col h-[80vh] overflow-hidden border border-purple-200">
+    <!-- POP-UP MODAL BILIK CHAT & SIDANG VIDEO VDO.NINJA -->
+    <div id="modalChatRSK" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-3 sm:p-4">
+        <div id="kotak-modal-utama" class="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col h-[85vh] overflow-hidden border border-purple-200 transition-all duration-300">
             <!-- Header Bilik Chat -->
-            <div class="bg-purple-900 text-white px-5 py-4 flex justify-between items-center">
-                <div>
+            <div class="bg-purple-900 text-white px-4 sm:px-5 py-3.5 flex justify-between items-center gap-2">
+                <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                        <h3 class="text-base font-bold" id="chat-tajuk-rsk">Sesi Khidmat Nasihat</h3>
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-400 flex-shrink-0"></span>
+                        <h3 class="text-sm sm:text-base font-bold truncate" id="chat-tajuk-rsk">Sesi Khidmat Nasihat</h3>
                     </div>
-                    <p class="text-[11px] text-purple-200" id="chat-subtajuk">Sesi sulit & sementara</p>
+                    <p class="text-[11px] text-purple-200 truncate" id="chat-subtajuk">Sesi sulit & sementara</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button id="btn-tamat-sesi" onclick="tamatkanSesiChat()" class="hidden bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold cursor-pointer">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <!-- Butang Sidang Video (Khas Untuk RSK) -->
+                    <button id="btn-toggle-video" onclick="togolVideoRSK()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 sm:px-3 py-1.5 rounded-lg font-bold cursor-pointer transition shadow-sm">
+                        📹 Mula Video
+                    </button>
+                    <button id="btn-tamat-sesi" onclick="tamatkanSesiChat()" class="hidden bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 sm:px-3 py-1.5 rounded-lg font-bold cursor-pointer transition shadow-sm">
                         Tamat Sesi
                     </button>
-                    <button onclick="tutupModalChat()" class="text-white hover:text-gray-300 font-bold text-2xl leading-none cursor-pointer">&times;</button>
+                    <button onclick="tutupModalChat()" class="text-white hover:text-gray-300 font-bold text-2xl leading-none cursor-pointer ml-1">&times;</button>
+                </div>
+            </div>
+
+            <!-- Ruangan Sidang Video VDO.Ninja (Tersembunyi sehingga diaktifkan) -->
+            <div id="kotak-video-chat" class="hidden bg-gray-950 border-b border-purple-300 flex flex-col">
+                <div class="bg-gray-900 text-gray-300 px-3 py-1.5 flex justify-between items-center text-[11px]">
+                    <span class="flex items-center gap-1.5 font-semibold text-emerald-400">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Sidang Video Langsung Aktif
+                    </span>
+                    <button type="button" onclick="muatSemulaVideo()" class="text-purple-300 hover:text-white underline cursor-pointer">
+                        🔄 Segar Semula Kamera
+                    </button>
+                </div>
+                <div class="w-full h-56 sm:h-64 bg-black relative">
+                    <iframe id="iframe-video-rsk" src="" class="w-full h-full border-0" allow="camera; microphone; fullscreen; display-capture; autoplay"></iframe>
                 </div>
             </div>
     
             <!-- Paparan Mesej -->
-            <div id="kotak-mesej-chat" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm">
-                <!-- Buih mesej masuk di sini -->
-            </div>
+            <div id="kotak-mesej-chat" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm"></div>
     
             <!-- Amaran Jika Sesi Tamat -->
             <div id="notis-sesi-tamat" class="hidden bg-red-50 text-red-700 text-xs text-center p-3 font-semibold border-t border-red-200">
@@ -533,7 +543,7 @@
         // KONFIGURASI FIREBASE REALTIME DATABASE
         // ==========================================
         const firebaseConfig = {
-            apiKey: "API_KEY_ASAL_DARI_FIREBASE_KAU",
+            apiKey: "AIzaSyDHYleYpAX1j_Wt-mfdT3BY6DeiZk3sQ1c", // <-- Kekalkan apiKey projek admin-jakess anda
             authDomain: "admin-jakess.firebaseapp.com",
             databaseURL: "https://admin-jakess-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "admin-jakess",
@@ -549,6 +559,8 @@
         let perananChatSemasa = 'AWAM'; 
         let namaPenghantarChat = 'Orang Awam';
         let rskAktifLogin = null;
+        let statusVideoSemasa = false;
+        let kodBilikVideoSemasa = null;
 
         // ==========================================
         // URL GOOGLE APPS SCRIPT
@@ -864,7 +876,7 @@
         }
 
         // ==========================================
-        // KHIDMAT NASIHAT - RSK ONLINE (FIREBASE)
+        // KHIDMAT NASIHAT - CHAT & SIDANG VIDEO VDO.NINJA
         // ==========================================
         async function muatSenaraiRSKOnline() {
             const container = document.getElementById('senarai-rsk-online');
@@ -909,7 +921,7 @@
                             <p class="text-xs text-gray-500 mb-4">📍 ${kawasan}</p>
                         </div>
                         <button onclick="mulakanChatAwam('${idUnik}', '${nama.replace(/'/g, "\\'")}')" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs py-3 rounded-xl transition cursor-pointer shadow">
-                            💬 Mula Chat Sekarang
+                            💬 Mula Sesi Khidmat Nasihat
                         </button>
                     </div>
                 `;
@@ -917,37 +929,89 @@
         }
 
         function mulakanChatAwam(idRSK, namaRSK) {
-            const namaPengunjung = prompt("Sila masukkan nama panggilan anda untuk memulakan sesi chat:");
+            const namaPengunjung = prompt("Sila masukkan nama panggilan anda untuk memulakan sesi:");
             if (!namaPengunjung || namaPengunjung.trim() === '') return;
             const idSesi = 'SESI-' + Date.now();
             perananChatSemasa = 'AWAM';
             namaPenghantarChat = namaPengunjung.trim();
             sesiChatSemasa = idSesi;
-            dbChat.ref(`sesi_chat/${idSesi}`).set({ idRSK: idRSK, namaRSK: namaRSK, namaAwam: namaPenghantarChat, status: 'AKTIF', masaMula: Date.now() });
-            dbChat.ref(`sesi_chat/${idSesi}/mesej`).push({ penghantar: 'SISTEM', teks: `Sesi khidmat nasihat antara ${namaPenghantarChat} dan ${namaRSK} telah dimulakan. Sila nyatakan persoalan anda.`, masa: Date.now() });
+            dbChat.ref(`sesi_chat/${idSesi}`).set({ 
+                idRSK: idRSK, 
+                namaRSK: namaRSK, 
+                namaAwam: namaPenghantarChat, 
+                status: 'AKTIF', 
+                videoAktif: null,
+                masaMula: Date.now() 
+            });
+            dbChat.ref(`sesi_chat/${idSesi}/mesej`).push({ 
+                penghantar: 'SISTEM', 
+                teks: `Sesi khidmat nasihat antara ${namaPenghantarChat} dan ${namaRSK} telah dimulakan. Sila nyatakan persoalan anda.`, 
+                masa: Date.now() 
+            });
             bukaTetingkapChat(idSesi, `Chat bersama ${namaRSK}`, `Anda log masuk sebagai: ${namaPenghantarChat}`, false);
         }
 
         function bukaTetingkapChat(idSesi, tajuk, subtajuk, isRSK) {
             sesiChatSemasa = idSesi;
+            statusVideoSemasa = false;
+            kodBilikVideoSemasa = null;
+
             document.getElementById('chat-tajuk-rsk').innerText = tajuk;
             document.getElementById('chat-subtajuk').innerText = subtajuk;
             document.getElementById('modalChatRSK').classList.remove('hidden');
+
             const btnTamat = document.getElementById('btn-tamat-sesi');
-            if (isRSK) btnTamat.classList.remove('hidden'); else btnTamat.classList.add('hidden');
+            const btnVideo = document.getElementById('btn-toggle-video');
+            if (isRSK) {
+                btnTamat.classList.remove('hidden');
+                btnVideo.classList.remove('hidden');
+            } else {
+                btnTamat.classList.add('hidden');
+                btnVideo.classList.add('hidden');
+            }
+
             const kotakMesej = document.getElementById('kotak-mesej-chat');
             kotakMesej.innerHTML = '';
 
+            // 1. Pantau status sesi (AKTIF / TAMAT)
+            dbChat.ref(`sesi_chat/${idSesi}/status`).off();
             dbChat.ref(`sesi_chat/${idSesi}/status`).on('value', snapshot => {
                 if (snapshot.val() === 'TAMAT') {
                     document.getElementById('notis-sesi-tamat').classList.remove('hidden');
                     document.getElementById('form-hantar-mesej').classList.add('hidden');
+                    btnVideo.classList.add('hidden');
+                    sembunyiBingkaiVideo();
                 } else {
                     document.getElementById('notis-sesi-tamat').classList.add('hidden');
                     document.getElementById('form-hantar-mesej').classList.remove('hidden');
+                    if (isRSK) btnVideo.classList.remove('hidden');
                 }
             });
 
+            // 2. Pantau status Sidang Video VDO.Ninja (Untuk RSK & Orang Awam)
+            dbChat.ref(`sesi_chat/${idSesi}/videoAktif`).off();
+            dbChat.ref(`sesi_chat/${idSesi}/videoAktif`).on('value', snapshot => {
+                const kodBilik = snapshot.val();
+                if (kodBilik) {
+                    statusVideoSemasa = true;
+                    kodBilikVideoSemasa = kodBilik;
+                    paparBingkaiVideo(kodBilik);
+                    if (isRSK) {
+                        btnVideo.innerText = '📵 Tutup Video';
+                        btnVideo.className = 'bg-amber-600 hover:bg-amber-700 text-white text-xs px-2.5 sm:px-3 py-1.5 rounded-lg font-bold cursor-pointer transition shadow-sm';
+                    }
+                } else {
+                    statusVideoSemasa = false;
+                    kodBilikVideoSemasa = null;
+                    sembunyiBingkaiVideo();
+                    if (isRSK) {
+                        btnVideo.innerText = '📹 Mula Video';
+                        btnVideo.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 sm:px-3 py-1.5 rounded-lg font-bold cursor-pointer transition shadow-sm';
+                    }
+                }
+            });
+
+            // 3. Pantau mesej chat masa nyata
             dbChat.ref(`sesi_chat/${idSesi}/mesej`).off();
             dbChat.ref(`sesi_chat/${idSesi}/mesej`).on('child_added', snapshot => {
                 const data = snapshot.val();
@@ -966,6 +1030,61 @@
             });
         }
 
+        function togolVideoRSK() {
+            if (!sesiChatSemasa) return;
+            if (!statusVideoSemasa) {
+                const namaBilikUnik = 'JKSM' + sesiChatSemasa.replace(/[^a-zA-Z0-9]/g, '');
+                dbChat.ref(`sesi_chat/${sesiChatSemasa}/videoAktif`).set(namaBilikUnik);
+                dbChat.ref(`sesi_chat/${sesiChatSemasa}/mesej`).push({
+                    penghantar: 'SISTEM',
+                    teks: '📹 Rakan Sulh Komuniti telah memulakan sesi sidang video.',
+                    masa: Date.now()
+                });
+            } else {
+                dbChat.ref(`sesi_chat/${sesiChatSemasa}/videoAktif`).set(null);
+                dbChat.ref(`sesi_chat/${sesiChatSemasa}/mesej`).push({
+                    penghantar: 'SISTEM',
+                    teks: '📵 Sesi sidang video telah ditamatkan.',
+                    masa: Date.now()
+                });
+            }
+        }
+
+        function paparBingkaiVideo(kodBilik) {
+            const kotakVideo = document.getElementById('kotak-video-chat');
+            const iframeVideo = document.getElementById('iframe-video-rsk');
+            const modalUtama = document.getElementById('kotak-modal-utama');
+
+            const labelBersih = encodeURIComponent(namaPenghantarChat || 'Peserta');
+            const urlVdoNinja = `https://vdo.ninja/?room=${kodBilik}&autostart&noheader&label=${labelBersih}`;
+
+            if (iframeVideo.src !== urlVdoNinja) {
+                iframeVideo.src = urlVdoNinja;
+            }
+            kotakVideo.classList.remove('hidden');
+            modalUtama.classList.remove('max-w-lg');
+            modalUtama.classList.add('max-w-2xl');
+        }
+
+        function sembunyiBingkaiVideo() {
+            const kotakVideo = document.getElementById('kotak-video-chat');
+            const iframeVideo = document.getElementById('iframe-video-rsk');
+            const modalUtama = document.getElementById('kotak-modal-utama');
+
+            iframeVideo.src = '';
+            kotakVideo.classList.add('hidden');
+            modalUtama.classList.remove('max-w-2xl');
+            modalUtama.classList.add('max-w-lg');
+        }
+
+        function muatSemulaVideo() {
+            if (!kodBilikVideoSemasa) return;
+            const iframeVideo = document.getElementById('iframe-video-rsk');
+            const urlSemasa = iframeVideo.src;
+            iframeVideo.src = '';
+            setTimeout(() => { iframeVideo.src = urlSemasa; }, 200);
+        }
+
         function hantarMesejChat(e) {
             e.preventDefault();
             if (!sesiChatSemasa) return;
@@ -977,7 +1096,8 @@
         }
 
         function tamatkanSesiChat() {
-            if (!sesiChatSemasa || !confirm("Adakah anda pasti mahu menamatkan sesi chat ini?")) return;
+            if (!sesiChatSemasa || !confirm("Adakah anda pasti mahu menamatkan sesi chat dan video ini?")) return;
+            dbChat.ref(`sesi_chat/${sesiChatSemasa}/videoAktif`).set(null);
             dbChat.ref(`sesi_chat/${sesiChatSemasa}/mesej`).push({ penghantar: 'SISTEM', teks: 'Sesi khidmat nasihat telah ditamatkan oleh Rakan Sulh Komuniti.', masa: Date.now() });
             dbChat.ref(`sesi_chat/${sesiChatSemasa}/status`).set('TAMAT');
         }
@@ -986,10 +1106,15 @@
             if (sesiChatSemasa) {
                 dbChat.ref(`sesi_chat/${sesiChatSemasa}/mesej`).off();
                 dbChat.ref(`sesi_chat/${sesiChatSemasa}/status`).off();
+                dbChat.ref(`sesi_chat/${sesiChatSemasa}/videoAktif`).off();
             }
+            sembunyiBingkaiVideo();
             document.getElementById('modalChatRSK').classList.add('hidden');
         }
 
+        // ==========================================
+        // PANEL KAWALAN RSK (DENGAN BUTANG PADAM MANUAL)
+        // ==========================================
         function binaPanelChatRSK(idRSK, namaRSK, statusOnlineSemasa) {
             const isOnline = statusOnlineSemasa.toUpperCase() === 'ONLINE';
             rskAktifLogin = { id: idRSK, nama: namaRSK };
@@ -1043,7 +1168,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-purple-200 pb-3">
                         <div>
                             <h4 class="font-bold text-purple-950 text-sm">🟢 Kawalan Khidmat Nasihat</h4>
-                            <p class="text-xs text-gray-600">Tukar status kepada ONLINE hanya apabila bersedia menerima chat.</p>
+                            <p class="text-xs text-gray-600">Tukar status kepada ONLINE hanya apabila bersedia menerima chat & video.</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="setStatusOnlineRSK('${idRSK}', 'ONLINE')" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition ${isOnline ? 'bg-green-600 text-white shadow' : 'bg-white text-gray-600 border'}">Set ONLINE</button>
@@ -1058,7 +1183,6 @@
             `;
         }
 
-// Fungsi padam sesi chat secara manual oleh RSK
         function padamSesiChat(idSesi) {
             if (!confirm("Padam rekod perbualan ini secara kekal?")) return;
             dbChat.ref(`sesi_chat/${idSesi}`).remove();
@@ -1112,15 +1236,14 @@
                     </div>
                     ${pemohon.CatatanUrusetia ? `<div class="bg-purple-50 border border-purple-200 p-3 rounded-xl text-xs text-purple-950"><strong>Nota Urusetia:</strong> ${pemohon.CatatanUrusetia}</div>` : ''}
                     
-                    <!-- PANEL CHAT RSK JIKA LULUS -->
                     ${statusVal === 'LULUS' ? binaPanelChatRSK(idUnik, pemohon.Nama || pemohon.nama, pemohon.StatusOnline || 'OFFLINE') : ''}
 
                     <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 mt-4">
                         <h4 class="font-bold text-purple-900 text-sm mb-3">✏️ Kemaskini Profil & Kata Laluan:</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">No. Telefon:</label><input type="text" id="edit-tel-${idUnik}" value="${pemohon.NoTel || pemohon.notel || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none"></div>
-                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Alamat Emel:</label><input type="email" id="edit-emel-${idUnik}" value="${pemohon.Emel || pemohon.emel || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none"></div>
-                            <div class="md:col-span-2"><label class="block text-xs font-semibold text-gray-600 mb-1">Kawasan Kediaman Utama:</label><input type="text" id="edit-kawasan-${idUnik}" value="${pemohon.Kawasan || pemohon.kawasan || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">No. Telefon:</label><input type="text" id="edit-tel-${idUnik}" value="${pemohon.NoTel || pemohon.notel || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none bg-white"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Alamat Emel:</label><input type="email" id="edit-emel-${idUnik}" value="${pemohon.Emel || pemohon.emel || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none bg-white"></div>
+                            <div class="md:col-span-2"><label class="block text-xs font-semibold text-gray-600 mb-1">Kawasan Kediaman Utama:</label><input type="text" id="edit-kawasan-${idUnik}" value="${pemohon.Kawasan || pemohon.kawasan || ''}" class="w-full text-xs p-2.5 border rounded-xl outline-none bg-white"></div>
                             <div class="md:col-span-2 bg-white p-3.5 rounded-xl border border-purple-100">
                                 <label class="block text-xs font-bold text-purple-950 mb-1">Tukar Kata Laluan Baharu:</label>
                                 <input type="password" id="edit-pass-${idUnik}" placeholder="Kosongkan jika tidak tukar" class="w-full text-xs p-2.5 border rounded-xl outline-none">
